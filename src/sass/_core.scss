@@ -1,0 +1,160 @@
+@mixin translateXYZ($a, $b, $c:0) {
+	-webkit-transform:translate3d($a, $b, $c);
+	-moz-transform:translate3d($a, $b, $c);
+	transform:translate3d($a, $b, $c);
+}
+
+@mixin transform($a) {
+	-webkit-transform:#{$a};
+	-moz-transform:#{$a};
+	transform:#{$a};
+}
+
+@mixin prePost($top:'', $right:'', $bottom:'', $left:'') {
+	@if $top != '' { top:$top; }
+	@if $right != '' { right:$right;}
+	@if $bottom != '' { bottom:$bottom; }
+	@if $left != '' { left:$left; }
+}
+
+@mixin borderRadius($a:'', $b:'', $c:'', $d:'') {
+	-webkit-border-radius:$a #{$b} #{$c} #{$d};
+	-moz-border-radius:$a #{$b} #{$c} #{$d};
+	border-radius:$a #{$b} #{$c} #{$d};
+}
+
+@mixin size($width:'', $height:'') {
+	@if $width != '' { width: $width; }
+	@if $height != '' { height: $height; }
+}
+
+@mixin resetMP() {
+	margin:0;
+	padding:0;
+}
+
+@mixin bgSize($a:cover) {
+	-webkit-background-size: $a;
+  -moz-background-size: $a;
+  -o-background-size: $a;
+  background-size: $a;
+}
+
+@mixin prefix($property, $value, $prefixes: (webkit moz o ms)) {
+  @each $prefix in $prefixes {
+    #{'-' + $prefix + '-' + $property}: $value;
+  }
+ 
+  // Output standard non-prefixed declaration
+  #{$property}: $value;
+}
+
+@function prefix($property, $prefixes: (webkit moz o ms)) {
+    $vendor-prefixed-properties: transform background-clip background-size;
+    $result: ();
+    @each $prefix in $prefixes {
+       @if index($vendor-prefixed-properties, $property) {
+         $property: -#{$prefix}-#{$property}
+       }
+       $result: append($result, $property);
+    }
+    @return $result;
+}
+ 
+@function trans-prefix($transition, $prefix: moz) {
+    $prefixed: ();
+    @each $trans in $transition {
+        $prop-name: nth($trans, 1);
+        $vendor-prop-name: prefix($prop-name, $prefix);
+        $prop-vals: nth($trans, 2);
+        $prefixed: append($prefixed, ($vendor-prop-name $prop-vals), comma);
+    }
+    
+    @return $prefixed;
+}
+ 
+ 
+@mixin transition($values...) { 
+    $transitions: ();
+    @each $declaration in $values {
+        $prop: nth($declaration, 1);
+        $prop-opts: ();
+        $length: length($declaration);
+        @for $i from 2 through $length {
+            $prop-opts: append($prop-opts, nth($declaration, $i));   
+        }
+        $trans: ($prop, $prop-opts);
+        $transitions: append($transitions, $trans, comma);
+    }
+      
+    -webkit-transition: trans-prefix($transitions, webkit);
+    -moz-transition: trans-prefix($transitions, moz);
+    -o-transition: trans-prefix($transitions, o);
+    transition: $values;
+}
+
+@mixin animation($animate...) {
+    $max: length($animate);
+    $animations: '';
+
+    @for $i from 1 through $max {
+        $animations: #{$animations + nth($animate, $i)};
+        @if $i < $max {
+            $animations: #{$animations + ", "};
+        }
+    }
+    -webkit-animation: $animations;
+    -moz-animation:    $animations;
+    -o-animation:      $animations;
+    animation:         $animations;
+}
+
+@mixin keyframes($animationName) {
+    @-webkit-keyframes #{$animationName} {
+        @content;
+    }
+    @-moz-keyframes #{$animationName} {
+        @content;
+    }
+    @-o-keyframes #{$animationName} {
+        @content;
+    }
+    @keyframes #{$animationName} {
+        @content;
+    }
+}
+
+@mixin boxSizing($a: border-box) {	
+	-webkit-box-sizing: $a;
+	-moz-box-sizing: $a;
+	box-sizing: $a;
+}
+
+@mixin panah($arah, $warna:red, $tebal:10px) {
+	
+	$tmp:'';
+	
+	@if $arah == 'atas' {
+		$tmp:transparent transparent $warna transparent;
+	} @else if $arah == 'bawah' {
+		$tmp:$warna transparent transparent transparent;
+	} @else if $arah == 'kanan' {
+		$tmp:transparent transparent transparent $warna;
+	} @else if $arah == 'kiri' {
+		$tmp:transparent $warna transparent transparent ;
+	}
+	
+	border-color:$tmp;
+	border-width:$tebal;
+	border-style:solid;
+
+}
+
+a {
+	text-decoration:none;
+}
+
+
+
+
+
