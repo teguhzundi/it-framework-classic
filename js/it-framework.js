@@ -1,8 +1,5 @@
-//**************** JSON.stringify : to convert JSON into string ************//
-var base_url = base_url || '';
 var base_events = ["blur", "change", "click", "dblclick", "focus", "hover", "keydown", "keypress", "keyup", "show", "hide"];
 
-//**************** String.format : to create formatted string ************//
 String.prototype.format = function () {
 	tmp = arguments;
 	return this.replace(/\{(\d+)\}/g, function (m, i) {
@@ -138,8 +135,7 @@ function DataTable(options) {
 		id: '',
 		width: '',
 		height: '',
-		cellEditing: true,
-		multipleSelected: false,
+		typeTable: '',
 		wrap: false,
 		store: {
 			type: 'json',
@@ -150,14 +146,12 @@ function DataTable(options) {
 		},
 		css: {},
 		columns: [],
-		autoLoad: false,
 	}, options);
 
 	var me = this;
 	var parent = null;
 	var id = settings.id == "" ? makeid() : settings.id;
 	var lastRow = null;
-
 	var DataTable = $(`
 		<div class="it-grid">
 			<div class="it-grid-container">
@@ -188,15 +182,11 @@ function DataTable(options) {
 		</div>
 	`);
 	DataTable.attr('id', id);
+	DataTable.find('.it-grid-container').addClass(settings.typeTable);
 
-	if (settings.width)
-		DataTable.width(settings.width);
-
-	if (settings.height)
-		DataTable.height(settings.height);
-
-	if (!$.isEmptyObject(settings.css))
-		DataTable.css(settings.css);
+	if (settings.width) DataTable.width(settings.width);
+	if (settings.height) DataTable.height(settings.height);
+	if (!$.isEmptyObject(settings.css)) DataTable.css(settings.css);
 
 	this.events = new Event(me, settings);
 	this.onItemClick = (act) => this.events.add("onItemClick", act);
@@ -319,7 +309,7 @@ function DataTable(options) {
 								class: "it-grid-form-control",
 								val: value,
 								required: required
-							}).height(td.height()-1);
+							}).height(td.height() - 1);
 						} else {
 							var dontAllow = ["file", "radio", "checkbox", "numeric"];
 							var input = $('<input/>', {
@@ -363,7 +353,7 @@ function DataTable(options) {
 								if (max && value > max) $(this).val(max);
 							});
 						}
-						
+
 						if (editor.type == "numeric" || editor.type == "rupiah") {
 							input.keypress(function (e) {
 								if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
@@ -378,10 +368,10 @@ function DataTable(options) {
 							if (valid) {
 								var value = input.val();
 								var changed = me.store.cekData(this.selectedRecord, settings.columns[this.selectedColumn].dataIndex, value);
-								
+
 								div.html(value);
 								td.removeClass("it-grid-editing");
-								td[changed ? "addClass" : "removeClass"]('it-grid-changed');		
+								td[changed ? "addClass" : "removeClass"]('it-grid-changed');
 								e.preventDefault();
 							} else {
 								setTimeout(() => input.focus(), 100);
@@ -404,7 +394,7 @@ function DataTable(options) {
 			}
 		}
 	}
-	
+
 	this.createRows = function (row) {
 		var tr = $('<tr/>').appendTo(DataTable.find("tbody"));
 		$.each(settings.columns, (colIndex, col) => {
@@ -432,8 +422,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-						src: url + value
-					})
+					src: url + value
+				})
 					.css({
 						width: 80,
 						height: 80,
@@ -444,11 +434,11 @@ function DataTable(options) {
 			// Jika Text, dll
 			else {
 				var dataHelper = col.data != undefined ? col.data : null;
-				if(dataHelper) {
-					$.each(dataHelper, function(k, data) {
-						if(data.key == value) {
+				if (dataHelper) {
+					$.each(dataHelper, function (k, data) {
+						if (data.key == value) {
 							value = data.value;
-						}	
+						}
 					});
 				}
 				div.html(value);
@@ -495,9 +485,9 @@ function DataTable(options) {
 		}
 	}
 
-	this.removeRow = function(row) {
+	this.removeRow = function (row) {
 		var deleted = this.data.rows.splice(row, 1);
-		DataTable.find(`tbody > tr:eq(${row})`).fadeOut(100, function() {
+		DataTable.find(`tbody > tr:eq(${row})`).fadeOut(100, function () {
 			$(this).remove();
 		});
 	};
@@ -584,6 +574,7 @@ function DataTable(options) {
 
 // Deprecated
 function Grid(options) {
+	console.warn("Grid is depecated. For the future use DataTable.");
 	return new DataTable(options);
 }
 
@@ -1275,7 +1266,7 @@ function MessageBox(params) {
 	me.show = function () {
 		try {
 			$('input,select,textarea').blur();
-		} catch (e) {}
+		} catch (e) { }
 		$('.it-messagebox').addClass('it-messagebox-s');
 		$('#it-modalConfirm').show();
 	}
@@ -1645,6 +1636,11 @@ function Form(params) {
 		css: settings.css
 	});
 
+	var submit = $('<input/>', {
+		type: 'submit',
+		css: { 'display': 'none' }
+	}).appendTo($konten);
+
 	var nItems = {};
 	if (settings.items.length > 0) {
 		var $itemsContainer = $('<table/>', {
@@ -1697,16 +1693,10 @@ function Form(params) {
 			}
 		});
 	}
-	me.setInvalid = function (data) {
-		$.each(data, function (key, value) {
-			$konten.find("#" + key).wrap('<div class=\"it-infoBox\"/>');
-			$konten.find("#" + key).parent().append('<div class=\"it-infoBox-message\"> ' + value + ' </div>');
-			$konten.find("#" + key).parent().find(".it-infoBox-message").css('left', $konten.find("#" + key).outerWidth() + 10);
-			$konten.find("#" + key).addClass('invalid');
-		});
-	}
 
+	// Deprecated
 	me.validasi = function (msg) {
+		console.warn(".validasi() is deprecated, for the future please use .validate()");
 		var msg = typeof msg == 'undefined' ? true : msg;
 		var valid = true;
 		$.each(nItems, function (i, item) {
@@ -1747,28 +1737,46 @@ function Form(params) {
 	}
 
 	me.serializeObject = function () {
+		console.warn(".serializeObject() is deprecated, for the future please use .serializeJSON()");
 		return $konten.serializeJSON();
 	}
 
-	me.renderTo = function (obj) {
+	this.serializeJSON = function () {
+		return $konten.serializeJSON();
+	}
+
+	this.serialize = function () {
+		return $konten.serialize();
+	}
+
+	this.validate = function () {
+		var valid = false;
+		$konten.removeAttr('novalidate');
+		$konten.find('.it-form-control').blur();
+		$konten.find(':submit').click((e) => {
+			valid = $konten[0].checkValidity();
+			if (valid) {
+				e.preventDefault();
+			}
+		});
+		$konten.find(':submit').click();
+		return valid;
+	}
+
+	this.renderTo = function (obj) {
 		$konten.appendTo(obj);
 		parent = obj;
 	}
 
-	me.clear = function () {
-		$.each($konten.serializeObject(), function (key, value) {
-			if ($konten.find("#" + key).attr("type") != "file") {
-				$konten.find("#" + key).val("");
-				//$konten.find("#" + key).find("option").filter('[value="' + value + '"]').prop("selected", true);
-				//$konten.find("#" + key).prop("checked", (value == 1 ? true : false));
-			}
-		});
+	this.reset = function () {
+		$konten[0].reset();
 	}
 
-	me.getSetting = function () {
+	this.getSetting = function () {
 		return settings;
 	}
-	me.getId = function () {
+
+	this.getId = function () {
 		return id;
 	}
 
@@ -1779,164 +1787,87 @@ function TextBox(params) {
 	var settings = $.extend({
 		dataIndex: 'textfield',
 		type: 'text',
-		size: 20,
-		maxlength: 0,
-		minlength: 0,
-		rows: 50,
-		cols: 3,
+		maxlength: null,
+		minlength: null,
 		format: '',
 		disabled: false,
 		readOnly: false,
 		allowBlank: true,
-		autoComplete: null,
-		searchButton: false,
 		defaultValue: '',
 		css: {}
 	}, params);
 
-	var me = this;
 	var parent = null;
-	me.events = new Event(me, settings);
-	maxlength = settings.maxlength > 0 ? ' maxlength="' + settings.maxlength + '" ' : '';
-	minlength = settings.minlength > 0 ? ' minlength="' + settings.minlength + '" ' : '';
-	disabled = settings.disabled > 0 ? ' disabled ' : '';
-	readOnly = settings.readOnly > 0 ? ' readonly ' : '';
-	value = settings.defaultValue != '' ? ' value="' + settings.defaultValue + '" ' : '';
+	this.events = new Event(this, settings);
 
-	if (settings.type == 'password') {
-		var konten = '<input class="it-textbox" type="password" size="' + settings.size + '" name="' + settings.dataIndex + '" id="' + settings.dataIndex + '"' + maxlength + minlength + disabled + readOnly + value + getStyle(settings) + '>';
-	} else if (settings.type == 'date') {
-		var konten = '<input class="it-textbox" type="text" size="' + settings.size + '" name="' + settings.dataIndex + '" id="' + settings.dataIndex + '"' + maxlength + minlength + disabled + readOnly + value + getStyle(settings) + '>';
-	} else if (settings.type == 'numeric') {
-		var konten = '<input class="it-textbox" type="text" size="' + settings.size + '" name="' + settings.dataIndex + '" id="' + settings.dataIndex + '"' + maxlength + minlength + disabled + readOnly + value + getStyle(settings) + '>';
-	} else if (settings.type == 'textarea') {
-		value = settings.defaultValue;
-		var konten = '<textarea class="it-textbox" rows="' + settings.rows + '" cols="' + settings.cols + '" name="' + settings.dataIndex + '" id="' + settings.dataIndex + '"' + maxlength + minlength + disabled + readOnly + getStyle(settings) + '>' + value + '</textarea>';
+	var inputAllowed = ['text', 'password', 'date', 'email'];
+	var input = null;
+	if (settings.type == 'textarea') {
+		input = $('<textarea/>');
 	} else {
-		var konten = '<input class="it-textbox" type="' + settings.type + '" size="' + settings.size + '" name="' + settings.dataIndex + '" id="' + settings.dataIndex + '"' + maxlength + minlength + disabled + readOnly + value + getStyle(settings) + ' >';
-	}
-
-	var $konten = $(konten);
-	$konten.css(settings.css);
-
-	if (settings.autoComplete != null) {
-		$konten.autocomplete(settings.autoComplete);
-	}
-
-	me.autoComplete = function (set) {
-		$konten.autocomplete(set);
-	}
-
-	$konten.blur(function () {
-		$(this).removeClass("invalid");
-		if (!settings.allowBlank && $(this).val() == "") $(this).addClass("invalid");
-		if ($(this).val().length < settings.minlength && $(this).val() != "") $(this).addClass("invalid");
-	});
-
-	$.extend(me, me.events.set($konten));
-
-	if (settings.format != '') {
-		if (typeof settings.format.money != 'undefined') {
-			$konten.maskMoney({
-				allowNegative: true,
-				thousands: '.',
-				decimal: ',',
-				defaultZero: false,
-				precision: 0,
-				browser: {
-					mozilla: true,
-					msie: false
+		input = $('<input/>', { type: $.inArray(settings.type, inputAllowed) > -1 ? settings.type : 'text' });
+		if (settings.minlength) input.attr('minlength', settings.minlength);
+		if (settings.maxlength) input.attr('maxlength', settings.maxlength);
+		if (settings.type == 'numeric') {
+			input.keypress(function (e) {
+				if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+					return false;
 				}
 			});
-		} else {
-			$konten.mask(settings.format);
 		}
 	}
-	if (settings.type == 'date') {
-		var today = new Date();
-		$konten.datepicker({
-			dateFormat: settings.dateformat || 'dd-mm-yy',
-			changeMonth: true,
-			changeYear: true,
-			yearRange: (today.getFullYear() - 60) + ":" + today.getFullYear(),
-			onSelect: function (a, b) {
-				$(this).focus();
-			}
-		});
-	}
-	if (settings.type == 'numeric') {
-		var tmpAngka = "";
-		$konten.keyup(function (e) {
-			if ($.isNumeric($(this).val()) == false && !empty($(this).val())) {
-				$(this).val(tmpAngka);
-			} else {
-				tmpAngka = $(this).val();
-			}
-		});
-	}
 
-	if (settings.type == 'mask') {
-		$konten.change(function (e) {
-			if ($(this).val().match(settings.mask) == null) {
-				$(this).val("");
-				new MessageBox({
-					type: 'critical',
-					width: '400',
-					title: 'Peringatan',
-					message: settings.maskMsg || "Format tidak sesuai"
-				});
-			}
-		});
-	}
+	input.attr({
+		name: settings.dataIndex,
+		id: settings.dataIndex,
+		class: 'it-form-control'
+	});
 
-	me.val = function (v) {
-		if (typeof v == "undefined") {
-			return $konten.val() || $konten.find("input").val() || "";
+	if (settings.defaultValue)
+		input.val(settings.defaultValue)
+
+	if (settings.disabled)
+		input.attr('disabled', true);
+
+	if (settings.readOnly)
+		input.att('readonly', true);
+
+	if (!settings.allowBlank)
+		input.prop('required', true);
+
+	if (!$.isEmptyObject(settings.css))
+		input.css(settings.css)
+
+	input.blur((e) => {
+		var valid = e.target.checkValidity();
+		input[!valid ? "addClass" : "removeClass"]('invalid');
+	});
+
+	$konten = input;
+	$.extend(this, this.events.set($konten));
+
+	this.val = function (v) {
+		if (typeof v == undefined) {
+			return $konten.val() || "";
 		} else {
 			$konten.val(v);
-			$konten.find("input").val(v)
 		}
 	}
 
-	me.renderTo = function (obj) {
-		if (typeof settings.infoHolder == 'object') {
-			$wrap = $('<div class="it-infoBox"/>');
-			$konten = $wrap.append($konten);
-
-			var infoText = typeof settings.infoHolder.text != 'undefined' ? settings.infoHolder.text : '';
-			infoText = typeof settings.infoHolder.icon != 'undefined' ? '<span class="fa fa-' + settings.infoHolder.icon + '"></span>' : infoText;
-			$konten.prepend('<div class=\"keterangan ' + settings.infoHolder.position + '\"> ' + infoText + ' </div>');
-		}
-		if (settings.searchButton) {
-			$konten.attr("readonly", true);
-			$wrap = $('<div class="it-search-box"/>');
-			$konten = $wrap.append($konten);
-
-			var btnS = new Button({
-				iconCls: 'search-plus',
-				text: 'Cari',
-				handler: settings.handler || null
-			});
-
-			btnS.renderTo($konten);
-
-			$konten.find("input").click(function () {
-				$konten.find(".it-btn").click();
-			});
-		}
-
+	this.renderTo = function (obj) {
 		$konten.appendTo(obj);
 		parent = obj;
 	}
 
-	me.getSetting = function () {
+	this.getSetting = function () {
 		return settings;
 	}
 
-	me.getId = function () {
+	this.getId = function () {
 		return settings.dataIndex;
 	}
-	return me;
+
+	return this;
 }
 
 function CheckBox(params) {
@@ -1965,53 +1896,6 @@ function CheckBox(params) {
 	}
 	me.getId = function () {
 		return settings.dataIndex;
-	}
-	return me;
-}
-
-function Panel(params) {
-	var settings = $.extend({
-		iconCls: '',
-		title: '',
-		height: 0,
-		column: false,
-		items: []
-	}, params);
-
-	var me = this;
-	var parent = null;
-	var id = makeid();
-	var items = settings.items;
-
-	var height = settings.height != 0 ? 'style="height:' + settings.height + '"' : '';
-	var htmlTitle = settings.title == '' ? '' : '<div class="it-title"> <span class="fa fa-' + settings.iconCls + '"> </span> ' + settings.title + '</div>';
-	var konten = '<article id="it-konten" id="' + id + '" ' + getStyle(settings) + '>' + htmlTitle + '</article>';
-
-	konten = settings.column ? '<section class="column" ' + height + '>' + htmlTitle + '</section>' : konten;
-	var $konten = $(konten);
-	for (var i = 0; i < items.length; i++) {
-		if (items[i] === null) continue;
-		var item = null;
-
-		if (typeof items[i].renderTo == 'function') {
-			item = items[i];
-		} else if (typeof items[i] == 'object') {
-			item = createObject(items[i]);
-		}
-
-		item.renderTo($konten);
-	}
-
-	me.renderTo = function (obj) {
-		$konten.appendTo(obj);
-		parent = obj;
-	}
-
-	me.getSetting = function () {
-		return settings;
-	}
-	me.getId = function () {
-		return id;
 	}
 	return me;
 }
@@ -2080,4 +1964,22 @@ function FlexBox(params) {
 		return id;
 	}
 	return me;
+}
+
+// Deprecated
+function Panel(params) {
+	console.warn("Panel is depecated. For the future use FlexBox.");
+
+	var settings = $.extend({
+		iconCls: '',
+		title: '',
+		items: []
+	}, params);
+
+	return new FlexBox({
+		title: settings.title,
+		iconTitle: settings.iconCls,
+		direction: 'column',
+		items: settings.items
+	});
 }
