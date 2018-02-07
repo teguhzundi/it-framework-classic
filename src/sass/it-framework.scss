@@ -200,6 +200,12 @@
 		border: 1px solid #f23a5d;
 	}
 
+	&[readonly] {
+		background: #E9ECEF;
+		border-color: #CED4DA;
+		pointer-events: none;
+	}
+
 	&.focus {
 		border: 1px solid #4ec1ff;
 	}

@@ -1304,13 +1304,6 @@ function ComboBox(params) {
 		disabled: false,
 		width: '',
 		temp: false,
-		styled: {
-			active: false,
-			search: false,
-			showKey: false,
-			optionWidth: 0,
-			optionHeight: 0
-		},
 		datasource: {
 			type: 'array',
 			data: null,
@@ -1334,23 +1327,8 @@ function ComboBox(params) {
 
 	var disabled = settings.disabled == true ? "disabled" : "";
 	var $width = settings.width != '' ? 'style="width:' + settings.width + 'px;"' : '';
-	var konten = '<div class="it-combobox-wrap"><select ' + $width + ' name="' + settings.dataIndex + '" id="' + settings.dataIndex + '" ' + getStyle(settings) + disabled + ' class="it-combobox"></select></div>';
+	var konten = '<div class="it-combobox-wrap"><select ' + $width + ' name="' + settings.dataIndex + '" id="' + settings.dataIndex + '" ' + getStyle(settings) + disabled + ' class="it-form-control"></select></div>';
 	var $konten = $(konten);
-
-	if (settings.styled.active) {
-		$konten.find("select").css("visibility", "hidden");
-		$konten.append("<div class='it-combobox-styled'/>");
-		$konten.append("<ol class='it-combobox-options'/>");
-
-		if (settings.styled.search) {
-			$konten.append("<input type='text' class='word'>");
-			$konten.find("ol.it-combobox-options").css("top", "55px");
-		}
-		if (settings.styled.optionWidth > 0) $konten.find("ol").css("min-width", settings.styled.optionWidth);
-		if (settings.styled.optionHeight > 0) $konten.find("ol").css("max-height", settings.styled.optionHeight);
-		if (typeof settings.align != "undefined" && settings.align == "kanan") $konten.find("ol").css("right", 0);
-	}
-
 
 	me.getDataSource = function (params) {
 		$konten.find("select").html('');
@@ -1414,83 +1392,18 @@ function ComboBox(params) {
 			});
 		}
 	}
-	me.onComplete(function () {
-		if (settings.styled.active) {
-			$this = $konten.find("select");
-			var numberOfOptions = $this.children('option').length;
-			var $val = $this.find('option:selected').val() != "" && settings.styled.showKey ? $this.find('option:selected').val() : $this.find('option:selected').text();
-			$konten.find("div.it-combobox-styled").text($val);
-
-			$konten.find("ol.it-combobox-options").html("");
-			for (var i = 0; i < numberOfOptions; i++) {
-				$('<li/>', {
-					html: (settings.styled.showKey ? "<span>" + $this.children('option').eq(i).val() + "</span>" : "") + $this.children('option').eq(i).text(),
-					rel: $this.children('option').eq(i).val()
-				}).appendTo($konten.find("ol"));
-			}
-
-			$konten.find("div.it-combobox-styled").click(function (e) {
-				e.stopPropagation();
-
-				$('div.it-combobox-styled.active').each(function () {
-					$(this).removeClass('active').next('ol.it-combobox-options').hide();
-				});
-				$(this).toggleClass('active').next('ol.it-combobox-options').toggle();
-				$konten.find("input").show();
-			});
-
-			$konten.find("li").click(function (e) {
-				e.stopPropagation();
-
-				var $vv = $(this).attr('rel') != "" && settings.styled.showKey ? $(this).attr('rel') : $(this).text();
-				$konten.find("div.it-combobox-styled").text($vv).removeClass('active');
-				$this.val($(this).attr('rel'));
-				$konten.find("ol.it-combobox-options").hide();
-				$konten.find("input").hide();
-			});
-
-			$(document).click(function () {
-				$konten.find("div.it-combobox-styled").removeClass('active');
-				$konten.find("ol.it-combobox-options").hide();
-				$konten.find("input").hide();
-			});
-
-			$konten.find("input").click(function (e) {
-				e.stopPropagation();
-
-				$konten.find("ol.it-combobox-options").show();
-			});
-
-			var timer;
-			$konten.find("input").keyup(function (e) {
-				e.stopPropagation();
-				var cWord = $(this).val();
-				timer && clearTimeout(timer);
-				setTimeout(function () {
-					if (word != cWord) {
-						$('.loading').addClass('dont-show');
-
-						me.getDataSource($.extend(settings.datasource.params, {
-							word: cWord
-						}));
-						word = cWord;
-					}
-				}, 600);
-			});
-		}
-	});
 
 	if (settings.emptyText) $konten.find("select").append("<option value=''>" + settings.emptyText);
-	if (settings.autoLoad) {
-		me.getDataSource();
-	}
+	if (settings.autoLoad) { me.getDataSource(); }
 
 	me.events.add("hide", function () {
 		$konten.hide();
 	});
+
 	me.events.add("show", function () {
 		$konten.show();
 	});
+
 	me.events.add("blur", function () {
 		var val = typeof me.val() != 'undefined' ? me.val() : '';
 		var invalid = false;
@@ -1500,22 +1413,11 @@ function ComboBox(params) {
 
 		if (invalid) $(this).addClass("invalid");
 		else $(this).removeClass("invalid");
-
-		if (settings.styled.active) {
-			if (invalid) $konten.find("div.it-combobox-styled").addClass("invalid");
-			else $konten.find("div.it-combobox-styled").removeClass("invalid");
-		}
 	});
 
 	me.val = function (v) {
 		if (typeof v != "undefined") {
 			$konten.find('option').filter('[value="' + v + '"]').prop("selected", true);
-
-			if (settings.styled.active) {
-				$this = $konten.find("select");
-				var $val = !empty($this.find('option:selected').val()) && settings.styled.showKey ? $this.find('option:selected').val() : $this.find('option:selected').text();
-				$konten.find("div.it-combobox-styled").text($val);
-			}
 		} else {
 			return $konten.find('option:selected').val();
 		}
@@ -1634,6 +1536,13 @@ function Form(params) {
 		id: settings.id,
 		enctype: 'multipart/form-data',
 		css: settings.css
+	});
+	$konten.on('keyup keypress', function (e) {
+		var keyCode = e.keyCode || e.which;
+		if (keyCode === 13) {
+			e.preventDefault();
+			return false;
+		}
 	});
 
 	var submit = $('<input/>', {
@@ -1800,7 +1709,7 @@ function TextBox(params) {
 	var parent = null;
 	this.events = new Event(this, settings);
 
-	var inputAllowed = ['text', 'password', 'date', 'email'];
+	var inputAllowed = ['text', 'password', 'date', 'email', 'hidden'];
 	var input = null;
 	if (settings.type == 'textarea') {
 		input = $('<textarea/>');
@@ -1827,10 +1736,10 @@ function TextBox(params) {
 		input.val(settings.defaultValue)
 
 	if (settings.disabled)
-		input.attr('disabled', true);
+		input.prop('disabled', settings.disabled);
 
 	if (settings.readOnly)
-		input.att('readonly', true);
+		input.prop('readonly', settings.readOnly);
 
 	if (!settings.allowBlank)
 		input.prop('required', true);
@@ -1865,6 +1774,14 @@ function TextBox(params) {
 
 	this.getId = function () {
 		return settings.dataIndex;
+	}
+
+	this.setDisabled = function(disabled = false) {
+		input.prop('disabled', disabled);
+	}
+	
+	this.setReadOnly = function(readonly = false) {
+		input.prop('disabled', readonly);
 	}
 
 	return this;
