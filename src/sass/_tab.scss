@@ -1,0 +1,54 @@
+.it-tab { 
+	position: relative; 
+	border: 1px solid #ddd;
+	top: -1px;
+	@include flexbox();
+	@include flex-direction(column);
+	@include flex(1);
+
+	> ul { 
+		background: #f4f4f4;
+		border-bottom:1px solid #FFF;
+		margin: 0;
+		padding: 0;
+		
+		> li { 
+			display: inline;
+
+			> a { 
+				padding: 13px;
+				display: inline-block;
+				text-decoration: none;
+				color: #666;
+				font-weight: bold; 
+				border-right:1px solid #ddd;
+				@include prefix(user-select, none);	  
+
+				&:hover { 
+					background:#eee;  
+				}
+
+				&.active { 
+					background: #FFF;
+					color: #000;
+				} 
+			}
+
+			&:first-child {
+				a {
+					border-left-color: red;
+				}
+			}
+		}
+	}
+
+	> section { 
+		@include flex(1);
+		background: #FFF;
+		padding: 15px;
+		font-size: 14px;
+		line-height: 1.3em;
+		overflow: auto;
+	}
+}
+

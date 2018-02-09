@@ -1,0 +1,36 @@
+.it-dialog {
+	background: rgba(0, 0, 0, 0.5);
+	position: fixed;
+	z-index: 90;
+	@include prePost(0, 0, 0, 0);
+	@include flexbox();
+	@include align-items(center);
+	@include justify-content(center);
+
+	&-content {
+		background: #fff;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);	
+	}
+
+	&-inner {
+		@include flexbox();
+		@include flex-direction(column);
+	}
+
+	.it-toolbar {
+		width: 100%;
+		background: #f3f3f3;
+		border-right: none;
+		border-left: none;
+		padding: 6px;
+		border-radius: 0 0 4px 4px;
+
+        &.top {
+            border-top: none;
+        }
+
+		&.bottom {
+			border-bottom: none;
+        }        
+	}
+}

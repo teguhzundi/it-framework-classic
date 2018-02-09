@@ -422,8 +422,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-					src: url + value
-				})
+						src: url + value
+					})
 					.css({
 						width: 80,
 						height: 80,
@@ -477,7 +477,9 @@ function DataTable(options) {
 	this.addRow = function (row) {
 		if (!this.hasTdError) {
 			setTimeout(() => {
-				row = $.extend({}, row, { new: true });
+				row = $.extend({}, row, {
+					new: true
+				});
 				this.store.storeData.rows.push(row);
 				this.createRows(row);
 				DataTable.find('tbody tr:last-child td:first-child').click();
@@ -524,7 +526,9 @@ function DataTable(options) {
 			$.each(settings.columns, function (k, v) {
 				var th = $('<th/>', {
 					text: v.header,
-					css: { width: v.width }
+					css: {
+						width: v.width
+					}
 				});
 				th.appendTo(header);
 			});
@@ -954,10 +958,10 @@ function Button(params) {
 }
 
 function Dialog(params) {
-	var defaults = {
+	var settings = $.extend({
 		width: 300,
 		height: 300,
-		type: '',
+		autoHeight: true,
 		items: [],
 		padding: 5,
 		modal: true,
@@ -965,61 +969,46 @@ function Dialog(params) {
 		title: '',
 		iconCls: '',
 		autoShow: true,
-	};
+	}, params);
 
 	var me = this;
 	var id = makeid();
-	var settings = $.extend(defaults, params);
 	var icon = settings.iconCls != '' ? '<span class="fa fa-' + settings.iconCls + '"></span>' : '';
 	var $dialog = $(`
-		<div class="it-dialog ${getStyle(settings)} ${settings.type}">
-			<div class="it-dialog-effect">
+		<div class="it-dialog">
+			<div class="it-dialog-content">
 				<div class="it-title">${icon} ${settings.title}</div> 
+				<div class="it-dialog-inner"></div>
 			</div>
 		</div>
 	`);
-	var $modal = $('<div/>', {
-		class: 'it-modal it-hide',
-		id: 'it-modal-dialog'
+	$dialog.find('.it-dialog-content').width(settings.width);
+	$dialog.find('.it-dialog-content').css(settings.autoHeight ? 'min-height' : 'height', settings.height)
+	$dialog.find('.it-dialog-content').draggable({
+		handle: '.it-title',
+		appendTo: "body",
+		start: function () {
+			$(this).css({
+				"-webkit-transition": "none",
+				"-moz-transition": "none",
+				"-ms-transition": "none",
+				"transition": "none"
+			});
+		}
 	});
 
-	var curZ = $(".it-dialog").last().css("z-index") + 1;
-	var diaZ = curZ + 1;
-	if (curZ > 1) $modal.css("z-index", curZ);
-	if (diaZ > 2) $dialog.css("z-index", diaZ);
-
 	me.events = new Event(me, settings);
+
 	me.afterShow = function (act) {
 		me.events.add("afterShow", act);
 	}
+
 	me.onClose = function (act) {
 		me.events.add("onClose", act);
 	}
+
 	me.onHide = function (act) {
 		me.events.add("onHide", act);
-	}
-
-	if (settings.modal)
-		$modal.show();
-
-	$dialog.width(settings.width);
-
-	if (settings.type != 'fluid') {
-		$dialog
-			.find('.it-dialog-effect')
-			.height(settings.height)
-			.draggable({
-				handle: '.it-title',
-				appendTo: "body",
-				start: function () {
-					$(this).css({
-						"-webkit-transition": "none",
-						"-moz-transition": "none",
-						"-ms-transition": "none",
-						"transition": "none"
-					});
-				}
-			});
 	}
 
 	var items = settings.items;
@@ -1028,24 +1017,18 @@ function Dialog(params) {
 	for (var i = 0; i < items.length; i++) {
 		if (items[i] === null) continue;
 		if (typeof items[i].renderTo == 'function') {
-			items[i].renderTo($dialog.find(".it-dialog-effect"));
+			items[i].renderTo($dialog.find(".it-dialog-inner"));
 			nItems[i] = items[i];
 		} else if (typeof items[i] == 'object' && items[i].xtype == 'ajax') {
 			$.ajax({
 				url: items[i].url,
 				success: function (data) {
-					var $dialogKonten = $('<div class="dialog-konten"></div>');
-					$dialogKonten.css({
-						'padding': settings.padding
-					});
-					$dialogKonten.append(data);
-
-					$dialog.find(".it-dialog-effect").append($dialogKonten);
+					$dialog.find(".it-dialog-inner").append(ddata);
 				}
 			});
 		} else if (typeof items[i] == 'object') {
 			item = createObject(items[i]);
-			item.renderTo($dialog.find(".it-dialog-effect"));
+			item.renderTo($dialog.find(".it-dialog-inner"));
 			nItems[i] = item;
 		}
 	}
@@ -1053,30 +1036,26 @@ function Dialog(params) {
 	me.getItem = function (idx) {
 		return nItems[idx];
 	}
+
 	me.getSetting = function () {
 		return settings;
 	}
+
 	me.getId = function () {
 		return id;
 	}
 
 	me.hide = function () {
-		$dialog.removeClass('it-dialog-s');
-		$modal.hide();
-
+		$dialog.hide();
 		me.events.fire("onHide", []);
 	}
 
 	me.show = function () {
-		$dialog.addClass('it-dialog-s');
-		$modal.show();
-
 		me.events.fire("afterShow", []);
 	}
 
 	me.destroy = function () {
 		$dialog.remove();
-		$modal.remove();
 		me = null;
 	}
 
@@ -1084,18 +1063,16 @@ function Dialog(params) {
 		me.hide();
 		setTimeout(function () {
 			$dialog.remove();
-			$modal.remove();
 			me.events.fire("onClose", []);
 			me = null;
 		}, 600);
 	}
 
-	$('body').append($modal);
 	$('body').append($dialog);
 
-	setTimeout(function () {
+	if (settings.autoShow) {
 		me.show();
-	}, 200);
+	}
 
 	return me;
 }
@@ -1179,79 +1156,36 @@ function Tabs(params) {
 }
 
 function MessageBox(params) {
-	var defaults = {
+	var settings = $.extend({
 		type: 'info',
 		title: 'Judul',
 		message: '',
 		width: 450,
 		height: 50,
-		padding: 10,
 		buttons: [],
-		btnAlign: 'kanan'
-	};
+	}, params);
 
 	var me = this;
-	var settings = $.extend(defaults, params);
-	var btn = "";
-	var markup = [];
 	var buttons = settings.buttons;
-	var btn = null;
-	var btnCls = '';
+	var MessageBox = $(`
+		<div class="it-messagebox">
+			<div class="it-messagebox-content">
+				<div class="it-title">${settings.title}</div>
+				<div class="it-messagebox-inner">
+					<div class="message-icon ${settings.type}"></div>
+					${settings.message}
+				</div>
+				<div class="clearfix">
+					<div class="float-right message-buttons"></div>
+				</div>
+			</div>
+		</div>
+	`);
 
-	icon = '<img src="' + base_url + 'resources/framework/css/images/i-' + settings.type + '.png" style="margin:10px 10px 0; float:left;">';
-	markup = [
-		'<div class="it-modal" id="it-modalConfirm"></div>',
-		'<div class="it-messagebox" ' + getStyle(settings) + '>',
-		'<div class="it-messagebox-effect">',
-		'<div class="it-title">' + settings.title + '</div>',
-		'<table width="100%"><tr><td width="80">' + icon + '</td><td><p style="position:static;">' + settings.message + '</p></tr>',
-		'<tr><td colspan="2"><div id="it-confirmBtn" class="' + settings.btnAlign + '"></div></td></tr></table>',
-		'</div>',
-		'</div>'
-	].join('');
-	$markup = $(markup);
-
-	if (buttons.length == 0) {
-		btn = $('<a href="javascript:void(0)" class="it-btn">Ok</a>');
-		btn.click(function () {
-			me.hide();
-		});
-		btn.appendTo($markup.eq(1).find('#it-confirmBtn'));
-	} else {
-		for (var i = 0; i < buttons.length; i++) {
-			var $id = makeid();
-			var btnCls = typeof buttons[i].btnCls == 'undefined' ? '' : ' ' + buttons[i].btnCls;
-			var btn = $('<a id="' + $id + '" href="javascript:void(0)" class="it-btn' + btnCls + '">' + buttons[i].text + '</a>');
-
-			btn.appendTo($markup.eq(1).find('#it-confirmBtn'));
-
-			$markup.eq(1).find('#it-confirmBtn').find('#' + $id).click(function () {
-				var $bx = $(this).parent().find("a").index(this);
-				var handler = typeof buttons[$bx].handler != 'undefined' ? buttons[$bx].handler : null;
-
-				$('.it-messagebox').removeClass('it-messagebox-s');
-				$('#it-modalConfirm').hide();
-				setTimeout(function () {
-					$('.it-messagebox').remove();
-					$('#it-modalConfirm').remove();
-
-					if (typeof handler == 'function') {
-						handler.call();
-					} else if (typeof handler == 'string') {
-						window[handler]();
-					}
-				}, 250);
-			});
-		}
-	}
-
-	$markup.appendTo('body');
-
-	var ConfirmBox = $('.it-messagebox');
-	ConfirmBox.css('min-height', settings.height);
-	ConfirmBox.find('p').css('padding', settings.padding);
-	ConfirmBox.width(settings.width);
-	ConfirmBox.find('.it-messagebox-effect').draggable({
+	MessageBox.find('.it-messagebox-content').css({
+		'width': settings.width,
+		'min-height': settings.height
+	}).draggable({
 		handle: '.it-title',
 		appendTo: "body",
 		start: function () {
@@ -1263,31 +1197,58 @@ function MessageBox(params) {
 			});
 		}
 	});
-	me.show = function () {
-		try {
-			$('input,select,textarea').blur();
-		} catch (e) { }
-		$('.it-messagebox').addClass('it-messagebox-s');
-		$('#it-modalConfirm').show();
-	}
-	me.hide = function () {
-		$('.it-messagebox').removeClass('it-messagebox-s');
-		$('#it-modalConfirm').hide();
-		setTimeout(function () {
-			$('.it-messagebox').remove();
-			$('#it-modalConfirm').remove();
-		}, 250);
+
+	if (buttons.length == 0) {
+		var btn = $('<a/>', {
+			href: "javascript:void(0)",
+			class: "it-btn",
+			html: "OK",
+			click: function () {
+				me.hide();
+			}
+		});
+		btn.appendTo(MessageBox.find('.message-buttons'));
+	} else {
+		$.each(buttons, (k, v) => {
+			var btnClasses = v.btnCls != undefined ? v.btnCls : '';
+			var btn = $('<a/>', {
+				href: "javascript:void(0)",
+				html: v.text,	
+				class: "it-btn",
+				click: function () {
+					var handler = v.handler != undefined ? v.handler : null;
+					if (typeof handler == 'function') {
+						handler.call();
+					} else if (typeof handler == 'string') {
+						window[handler]();
+					}
+					me.hide();
+				}
+			});
+			btn.addClass(btnClasses);
+			btn.appendTo(MessageBox.find('.message-buttons'));
+		});
 	}
 
-	me.getSetting = function () {
+	MessageBox.appendTo('body');
+
+	setTimeout(() => this.show(), 100);
+
+	this.show = function () {
+		MessageBox.show();
+	}
+
+	this.hide = function () {
+		MessageBox.remove();
+	}
+
+	this.getSetting = function () {
 		return settings;
 	}
-	me.getId = function () {
+
+	this.getId = function () {
 		return id;
 	}
-	setTimeout(function () {
-		me.show();
-	}, 100);
 
 	return me;
 }
@@ -1394,7 +1355,9 @@ function ComboBox(params) {
 	}
 
 	if (settings.emptyText) $konten.find("select").append("<option value=''>" + settings.emptyText);
-	if (settings.autoLoad) { me.getDataSource(); }
+	if (settings.autoLoad) {
+		me.getDataSource();
+	}
 
 	me.events.add("hide", function () {
 		$konten.hide();
@@ -1547,7 +1510,9 @@ function Form(params) {
 
 	var submit = $('<input/>', {
 		type: 'submit',
-		css: { 'display': 'none' }
+		css: {
+			'display': 'none'
+		}
 	}).appendTo($konten);
 
 	var nItems = {};
@@ -1714,7 +1679,9 @@ function TextBox(params) {
 	if (settings.type == 'textarea') {
 		input = $('<textarea/>');
 	} else {
-		input = $('<input/>', { type: $.inArray(settings.type, inputAllowed) > -1 ? settings.type : 'text' });
+		input = $('<input/>', {
+			type: $.inArray(settings.type, inputAllowed) > -1 ? settings.type : 'text'
+		});
 		if (settings.minlength) input.attr('minlength', settings.minlength);
 		if (settings.maxlength) input.attr('maxlength', settings.maxlength);
 		if (settings.type == 'numeric') {
@@ -1776,11 +1743,11 @@ function TextBox(params) {
 		return settings.dataIndex;
 	}
 
-	this.setDisabled = function(disabled = false) {
+	this.setDisabled = function (disabled = false) {
 		input.prop('disabled', disabled);
 	}
-	
-	this.setReadOnly = function(readonly = false) {
+
+	this.setReadOnly = function (readonly = false) {
 		input.prop('disabled', readonly);
 	}
 
