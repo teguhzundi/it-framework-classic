@@ -1,4 +1,4 @@
-var base_events = ["blur", "change", "click", "dblclick", "focus", "hover", "keydown", "keypress", "keyup", "show", "hide"];
+var Events = ["blur", "change", "click", "dblclick", "focus", "hover", "keydown", "keypress", "keyup", "show", "hide"];
 
 String.prototype.format = function () {
 	tmp = arguments;
@@ -110,7 +110,7 @@ function Event(parent, s) {
 
 	me.set = function (b) {
 		var ret = {};
-		$.each(base_events, function (index, value) {
+		$.each(Events, function (index, value) {
 			var value = value;
 			var on = "on" + value.substring(0, 1).toUpperCase() + value.substring(1, value.length).toLowerCase();
 
