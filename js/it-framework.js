@@ -489,7 +489,6 @@ function DataTable(options) {
 						this.loadPage(lastPage);
 					break;
 				case 'next':
-					console.info(this.page, lastPage, this.data.total_rows, this.params.limit);
 					if (this.page < lastPage)
 						this.loadPage(this.page + 1);
 					break;
