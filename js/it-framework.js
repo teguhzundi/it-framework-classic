@@ -167,7 +167,8 @@ function DataTable(options) {
 						<li> <a href="javascript:void(0)" rel="back"> <i class="fa fa-chevron-left"></i> </a> </li>
 						<li>
 							<input type="text" class="pagination-current" value="1"> 
-							<span id="pagination-page-count"></span>
+							<span style="padding: 0 5px;">/</span>
+							<span class="pagination-page-count"></span>
 						</li>
 						<li> <a href="javascript:void(0)" rel="next"> <i class="fa fa-chevron-right"></i> </a> </li>
 						<li> <a href="javascript:void(0)" rel="last"> LAST </a> </li>
@@ -222,23 +223,6 @@ function DataTable(options) {
 
 	// End : Store Data
 
-	/*
-	me.showError = function (err) {
-		var arError = [];
-		for (var er = 0; er < err.length; er++) {
-			DataTable.find("tbody tr:eq(" + err[er].indexRow + ")").css("background", "#ffcece");
-			arError.push(err[er].indexRow);
-		}
-
-		for (var dc = 0; dc < me.store.dataChanged.length; dc++) {
-			if (arError.indexOf(me.store.dataChanged[dc].indexRow.toString()) == -1) {
-				DataTable.find("tbody tr:eq(" + me.store.dataChanged[dc].indexRow + ")").find("td").removeClass("it-grid-changed");
-				me.store.dataChanged.slice(dc);
-			}
-		}
-	}
-	*/
-
 	this.load = (opt = {}) => {
 		if (me.data) {
 			// Empty table body
@@ -250,7 +234,6 @@ function DataTable(options) {
 			var lastData = (start + limit);
 			var jmlData = me.data.rows.length;
 
-			lastRow = null;
 			lastData = lastData < totalRows ? lastData : totalRows;
 			var dataShow = totalRows > 0 ? (start + 1) + "/" + lastData : "0";
 			var jmlPage = Math.ceil(totalRows / limit);
@@ -388,8 +371,7 @@ function DataTable(options) {
 								setTimeout(() => input.focus(), 100);
 							}
 						});
-
-						break;
+					break;
 				}
 			}
 		}
@@ -496,7 +478,7 @@ function DataTable(options) {
 
 	this.setPage = (act) => {
 		if (this.data) {
-			lastPage = Math.ceil(this.data.total_rows / this.params.limit);
+			var lastPage = Math.ceil(this.data.total_rows / this.params.limit);
 			switch (act) {
 				case 'first':
 					if (this.page != 1)
@@ -507,6 +489,7 @@ function DataTable(options) {
 						this.loadPage(lastPage);
 					break;
 				case 'next':
+					console.info(this.page, lastPage, this.data.total_rows, this.params.limit);
 					if (this.page < lastPage)
 						this.loadPage(this.page + 1);
 					break;
@@ -575,7 +558,6 @@ function DataTable(options) {
 
 	return this;
 }
-
 // Deprecated
 function Grid(options) {
 	console.warn("Grid is depecated. For the future use DataTable.");
