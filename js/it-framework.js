@@ -145,6 +145,8 @@ function DataTable(options) {
 			}
 		},
 		css: {},
+		cssInjectRow: {},
+		cssInjectCell: {},
 		columns: [],
 	}, options);
 
@@ -378,7 +380,7 @@ function DataTable(options) {
 	}
 
 	this.createRows = function (row) {
-		var tr = $('<tr/>').appendTo(DataTable.find("tbody"));
+		var tr = $('<tr/>', { css: settings.cssInjectRow }).appendTo(DataTable.find("tbody"));
 		$.each(settings.columns, (colIndex, col) => {
 			var div = $('<div/>', {
 				width: typeof col.width !== "undefined" ? col.width : "",
@@ -430,6 +432,7 @@ function DataTable(options) {
 				valign: typeof col.valign !== "undefined" ? col.valign : "top",
 				align: typeof col.align !== "undefined" ? col.align : "left",
 				width: typeof col.width !== "undefined" ? col.width : "",
+				css: settings.cssInjectCell
 			}).data(col);
 
 			td.click((e) => {
@@ -440,9 +443,10 @@ function DataTable(options) {
 					this.selectedColumn = td.index();
 					var editor = typeof col.editor !== "undefined" ? col.editor : null;
 					var locked = typeof this.store.storeData.rows[this.selectedRecord].locked !== "undefined" ? this.store.storeData.rows[this.selectedColumn].locked : false;
-
 					if (editor && !locked)
 						this.setEditable(td);
+
+					this.events.fire("onItemClick", [this.getRecord(this.getSelectedRow())]);
 				}
 			});
 
@@ -553,6 +557,10 @@ function DataTable(options) {
 
 		DataTable.appendTo(obj);
 		parent = obj;
+	}
+
+	this.getComponent = function() {
+		return DataTable;
 	}
 
 	return this;
