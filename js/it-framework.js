@@ -581,7 +581,7 @@ function DataTable(options) {
 }
 // Deprecated
 function Grid(options) {
-	console.warn("Grid is depecated. For the future use DataTable.");
+	console.warn("Grid is depecated. move to DataTable.");
 	return new DataTable(options);
 }
 
