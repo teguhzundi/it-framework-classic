@@ -559,6 +559,20 @@ function DataTable(options) {
 		parent = obj;
 	}
 
+	this.serializeFromHTML = function() {
+		var rows = [];
+		DataTable.find("tbody tr").each(function(rowIndex, r) {
+			var row = {};
+			$(this).find("td").each(function(cellIndex, c) {
+				if(settings.columns[cellIndex].dataIndex) {
+					row[settings.columns[cellIndex].dataIndex] = $(this).text();
+				}
+			});
+			rows[rowIndex] = row;
+		});
+		return rows;
+	}
+	
 	this.getComponent = function() {
 		return DataTable;
 	}
