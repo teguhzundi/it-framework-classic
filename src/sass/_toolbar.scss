@@ -2,7 +2,7 @@
 	background: linear-gradient(to bottom,  #ffffff 1%,#f4f4f4 100%);
 	border: 1px solid #ddd;
 	white-space: nowrap;
-	padding: 4px;
+	padding: 2px;
 	@include flexbox();
 	@include flex(none);
 
@@ -70,7 +70,7 @@
 		}
 	}
 
-	&-kanan {
+	&-right {
 		@include justify-content(flex-end);
 	}
 

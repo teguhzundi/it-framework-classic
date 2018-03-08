@@ -1,5 +1,3 @@
-var Events = ["blur", "change", "click", "dblclick", "focus", "hover", "keydown", "keypress", "keyup", "show", "hide"];
-
 String.prototype.format = function () {
 	tmp = arguments;
 	return this.replace(/\{(\d+)\}/g, function (m, i) {
@@ -33,18 +31,8 @@ function makeid() {
 	return text;
 }
 
-function getStyle(obj) {
-	var style = "";
-	if (typeof obj.style != 'undefined') {
-		$.each(obj.style, function (key, value) {
-			style += key + ":" + value + ";";
-		});
-
-		style = style != "" ? " style='" + style + "' " : "";
-	}
-
-	return style;
-}
+// Deleted Method
+function getStyle(obj) { }
 
 function createObject(settings) {
 	xtype = settings.xtype;
@@ -86,47 +74,58 @@ function createObject(settings) {
 		case "flexbox":
 			res = new FlexBox(settings);
 			break;
+		default:
+			res = null;
+			console.warn(settings.xtype + " is not registered.");
+			break;
 	}
 	return res;
 }
 
-function Event(parent, s) {
-	var settings = s || {};
+function Event(parent, settings = {}) {
 	var me = this;
-	me.events = {};
-	me.add = function (e, f) {
-		if (typeof f == 'function') {
-			me.events[e] = f;
+	this.events = {};
+
+	this.add = function (name, callback) {
+		if (typeof callback === 'function') {
+			this.events[name] = callback;
 		}
+	}
+
+	this.getEvents = function () {
+		return this.events;
 	}
 
 	me.fire = function (events, arg, ret) {
 		var ret = ret || parent;
-		if (me.events.hasOwnProperty(events) && typeof me.events[events] == 'function')
+		if (me.events.hasOwnProperty(events) && typeof me.events[events] === 'function')
 			me.events[events].apply(ret, arg);
-		if (settings.hasOwnProperty(events) && typeof settings[events] == 'function')
+		if (settings.hasOwnProperty(events) && typeof settings[events] === 'function')
 			settings[events].apply(ret, arg);
 	}
 
-	me.set = function (b) {
-		var ret = {};
-		$.each(Events, function (index, value) {
-			var value = value;
-			var on = "on" + value.substring(0, 1).toUpperCase() + value.substring(1, value.length).toLowerCase();
+	this.set = function (obj) {
+		var events = {};
+		var allEvents = ["blur", "change", "click", "dblclick", "focus", "hover", "keydown", "keypress", "keyup", "show", "hide"];
 
-			ret[value] = function () {
-				b.trigger(value);
+		$.each(allEvents, (k, event) => {
+			var on = "on" + event.substring(0, 1).toUpperCase() + event.substring(1, event.length).toLowerCase();
+
+			events[on] = (action) => {
+				this.add(on, action);
 			}
-			ret[on] = function (act) {
-				me.add(on, act);
+
+			events[event] = function () {
+				obj.trigger(event);
 			}
-			b.on(value, function () {
-				me.fire(value, [], this);
-				me.fire(on, []);
+
+			obj.on(event, (e) => {
+				this.fire(on, [e.currentTarget, e]);
+				this.fire(event, [e.currentTarget, e]);
 			});
 		});
 
-		return ret;
+		return events;
 	}
 }
 
@@ -136,6 +135,7 @@ function DataTable(options) {
 		width: '',
 		height: '',
 		typeTable: '',
+		fixHeader: false,
 		wrap: false,
 		store: {
 			type: 'json',
@@ -157,6 +157,7 @@ function DataTable(options) {
 	var DataTable = $(`
 		<div class="it-grid">
 			<div class="it-grid-container">
+				<div class="it-grid-header-fix"></div>
 				<div class="it-grid-wrapper">
 					<table border="1" width="100%">
 						<thead></thead>
@@ -165,15 +166,15 @@ function DataTable(options) {
 				</div>
 				<nav class="it-grid-pagination">
 					<ul>
-						<li> <a href="javascript:void(0)" rel="first"> FIRST </a> </li>
-						<li> <a href="javascript:void(0)" rel="back"> <i class="fa fa-chevron-left"></i> </a> </li>
+						<li> <a href="javascript:void(0)" rel="first"><i class="fa fa-caret-left"></i></a></li>
+						<li> <a href="javascript:void(0)" rel="back"><i class="fa fa-angle-left"></i></a></li>
 						<li>
 							<input type="text" class="pagination-current" value="1"> 
 							<span style="padding: 0 5px;">/</span>
 							<span class="pagination-page-count"></span>
 						</li>
-						<li> <a href="javascript:void(0)" rel="next"> <i class="fa fa-chevron-right"></i> </a> </li>
-						<li> <a href="javascript:void(0)" rel="last"> LAST </a> </li>
+						<li> <a href="javascript:void(0)" rel="next"><i class="fa fa-angle-right"></i></a></li>
+						<li> <a href="javascript:void(0)" rel="last"><i class="fa fa-caret-right"></i></a></li>
 						<li>
 							Menampilkan 
 							<span class="pagination-show"></span> dari 
@@ -224,7 +225,6 @@ function DataTable(options) {
 	});
 
 	// End : Store Data
-
 	this.load = (opt = {}) => {
 		if (me.data) {
 			// Empty table body
@@ -373,7 +373,7 @@ function DataTable(options) {
 								setTimeout(() => input.focus(), 100);
 							}
 						});
-					break;
+						break;
 				}
 			}
 		}
@@ -406,8 +406,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-						src: url + value
-					})
+					src: url + value
+				})
 					.css({
 						width: 80,
 						height: 80,
@@ -442,7 +442,7 @@ function DataTable(options) {
 					this.selectedRecord = td.parent('tr').index();
 					this.selectedColumn = td.index();
 					var editor = typeof col.editor !== "undefined" ? col.editor : null;
-					var locked = typeof this.store.storeData.rows[this.selectedRecord].locked !== "undefined" ? this.store.storeData.rows[this.selectedColumn].locked : false;
+					var locked = typeof this.store.storeData.rows[this.selectedRecord].locked !== "undefined" ? this.store.storeData.rows[this.selectedRecord].locked : false;
 					if (editor && !locked)
 						this.setEditable(td);
 
@@ -559,12 +559,12 @@ function DataTable(options) {
 		parent = obj;
 	}
 
-	this.serializeFromHTML = function() {
+	this.serializeFromHTML = function () {
 		var rows = [];
-		DataTable.find("tbody tr").each(function(rowIndex, r) {
+		DataTable.find("tbody tr").each(function (rowIndex, r) {
 			var row = {};
-			$(this).find("td").each(function(cellIndex, c) {
-				if(settings.columns[cellIndex].dataIndex) {
+			$(this).find("td").each(function (cellIndex, c) {
+				if (settings.columns[cellIndex].dataIndex) {
 					row[settings.columns[cellIndex].dataIndex] = $(this).text();
 				}
 			});
@@ -572,8 +572,8 @@ function DataTable(options) {
 		});
 		return rows;
 	}
-	
-	this.getComponent = function() {
+
+	this.getComponent = function () {
 		return DataTable;
 	}
 
@@ -860,57 +860,50 @@ function ToolBar(params) {
 		items: []
 	}, params);
 
-	var me = this;
 	var parent = null;
 	var id = makeid();
-	var items = settings.items;
-	var nItems = {};
-
-	var konten = `
+	var items = [];
+	var template = $(`
 		<nav id="${id}" class="it-toolbar ` + (settings.position == 'bottom' ? 'bottom' : '') + `">
-			<ul class="it-toolbar-kiri left"></ul>
-			<ul class="it-toolbar-kanan right"></ul>
-		</nav>`;
+			<ul class="it-toolbar-left left"></ul>
+			<ul class="it-toolbar-right right"></ul>
+		</nav>
+	`);
 
-	var $konten = $(konten);
-	for (var i = 0; i < items.length; i++) {
-		if (items[i] === null) continue;
-		var align = 'kiri';
-		var item = null;
+	$.each(settings.items, (k, val) => {
+		var align = typeof val.align !== "undefined" && $.inArray(val.align, ['left', 'right']) > -1 ? val.align : "left";
 		var li = $('<li/>');
-
-		if (typeof items[i].renderTo == 'function') {
-			item = items[i];
-		} else if (typeof items[i] == 'object') {
-			item = createObject(items[i]);
+		var item = null;
+		if (typeof val === "object") {
+			item = createObject(val);
+			if (item) {
+				items.push(item.getId());
+				item.renderTo(li);
+				template.find('.it-toolbar-' + align).append(li);
+			}
 		}
-		nItems[item.getId()] = item;
 
-		item.renderTo(li);
-		align = typeof item.getSetting().align != 'undefined' ? item.getSetting().align : align;
-		$konten.find('.it-toolbar-' + align).append(li);
-	}
+	});
 
-	me.renderTo = function (obj) {
-		$konten.appendTo(obj);
+	this.renderTo = function (obj) {
+		template.appendTo(obj);
 		parent = obj;
 	}
 
-	me.text = " ";
-	me.debug = function (o) {
-		return nItems[o.trim()];
+	this.getItem = function (index) {
+		var currentItem = items[index];
+		return typeof currentItem !== "undefined" ? currentItem : null;
 	}
 
-	me.getItem = function (o) {
-		return nItems[o];
-	}
-	me.getSetting = function () {
+	this.getSetting = function () {
 		return settings;
 	}
-	me.getId = function () {
+
+	this.getId = function () {
 		return id;
 	}
-	return me;
+
+	return this;
 }
 
 function Button(params) {
@@ -919,7 +912,7 @@ function Button(params) {
 		btnCls: '',
 		css: {},
 		disabled: false,
-		text: 'Button',
+		text: '',
 		id: '',
 	}, params);
 
@@ -974,10 +967,10 @@ function Dialog(params) {
 		autoShow: true,
 	}, params);
 
-	var me = this;
 	var id = makeid();
 	var icon = settings.iconCls != '' ? '<span class="fa fa-' + settings.iconCls + '"></span>' : '';
-	var $dialog = $(`
+	var items = [];
+	var template = $(`
 		<div class="it-dialog">
 			<div class="it-dialog-content">
 				<div class="it-title">${icon} ${settings.title}</div> 
@@ -985,9 +978,10 @@ function Dialog(params) {
 			</div>
 		</div>
 	`);
-	$dialog.find('.it-dialog-content').width(settings.width);
-	$dialog.find('.it-dialog-content').css(settings.autoHeight ? 'min-height' : 'height', settings.height)
-	$dialog.find('.it-dialog-content').draggable({
+	template.find('.it-dialog-content').width(settings.width);
+	template.find('.it-dialog-content').css(settings.autoHeight ? 'min-height' : 'height', settings.height);
+	template.find('.it-dialog-content').css('overflow-y', settings.autoHeight ? 'none' : 'auto');
+	template.find('.it-dialog-content').draggable({
 		handle: '.it-title',
 		appendTo: "body",
 		start: function () {
@@ -1000,84 +994,66 @@ function Dialog(params) {
 		}
 	});
 
-	me.events = new Event(me, settings);
+	this.events = new Event(this, settings);
+	this.afterShow = (act) => this.events.add("afterShow", act);
+	this.onClose = (act) => this.events.add("onClose", act);
+	this.onHide = (act) => this.events.add("onHide", act);
 
-	me.afterShow = function (act) {
-		me.events.add("afterShow", act);
-	}
-
-	me.onClose = function (act) {
-		me.events.add("onClose", act);
-	}
-
-	me.onHide = function (act) {
-		me.events.add("onHide", act);
-	}
-
-	var items = settings.items;
-	var item = null;
-	var nItems = [];
-	for (var i = 0; i < items.length; i++) {
-		if (items[i] === null) continue;
-		if (typeof items[i].renderTo == 'function') {
-			items[i].renderTo($dialog.find(".it-dialog-inner"));
-			nItems[i] = items[i];
-		} else if (typeof items[i] == 'object' && items[i].xtype == 'ajax') {
-			$.ajax({
-				url: items[i].url,
-				success: function (data) {
-					$dialog.find(".it-dialog-inner").append(ddata);
-				}
-			});
-		} else if (typeof items[i] == 'object') {
-			item = createObject(items[i]);
-			item.renderTo($dialog.find(".it-dialog-inner"));
-			nItems[i] = item;
+	$.each(settings.items, (k, val) => {
+		var item = null;
+		if (typeof val.renderTo === 'function') {
+			val.renderTo(template.find('.it-dialog-inner'));
+			items.push(val);
+		} else if (typeof val === 'object') {
+			item = createObject(val);
+			if (item) {
+				item.renderTo(template.find(".it-dialog-inner"));
+				items.push(item);
+			}
 		}
+	});
+
+	this.getItem = function (index) {
+		return items[index];
 	}
 
-	me.getItem = function (idx) {
-		return nItems[idx];
-	}
-
-	me.getSetting = function () {
+	this.getSetting = function () {
 		return settings;
 	}
 
-	me.getId = function () {
+	this.getId = function () {
 		return id;
 	}
 
-	me.hide = function () {
-		$dialog.hide();
-		me.events.fire("onHide", []);
+	this.hide = function () {
+		template.hide();
+		this.events.fire("onHide", []);
 	}
 
-	me.show = function () {
-		me.events.fire("afterShow", []);
+	this.show = function () {
+		this.events.fire("afterShow", []);
 	}
 
-	me.destroy = function () {
-		$dialog.remove();
-		me = null;
+	this.destroy = function () {
+		console.warn("Dialog .destroy() is deprecated, please use .close()");
+		this.close();
 	}
 
-	me.close = function () {
-		me.hide();
+	this.close = function () {
+		this.hide();
 		setTimeout(function () {
-			$dialog.remove();
+			template.remove();
 			me.events.fire("onClose", []);
-			me = null;
 		}, 600);
 	}
 
-	$('body').append($dialog);
+	$('body').append(template);
 
 	if (settings.autoShow) {
-		me.show();
+		this.show();
 	}
 
-	return me;
+	return this;
 }
 
 function Tabs(params) {
@@ -1201,22 +1177,12 @@ function MessageBox(params) {
 		}
 	});
 
-	if (buttons.length == 0) {
-		var btn = $('<a/>', {
-			href: "javascript:void(0)",
-			class: "it-btn",
-			html: "OK",
-			click: function () {
-				me.hide();
-			}
-		});
-		btn.appendTo(MessageBox.find('.message-buttons'));
-	} else {
+	if (buttons.length) {
 		$.each(buttons, (k, v) => {
 			var btnClasses = v.btnCls != undefined ? v.btnCls : '';
 			var btn = $('<a/>', {
 				href: "javascript:void(0)",
-				html: v.text,	
+				html: v.text,
 				class: "it-btn",
 				click: function () {
 					var handler = v.handler != undefined ? v.handler : null;
@@ -1231,11 +1197,17 @@ function MessageBox(params) {
 			btn.addClass(btnClasses);
 			btn.appendTo(MessageBox.find('.message-buttons'));
 		});
+	} else {
+		var btn = $('<a/>', {
+			href: "javascript:void(0)",
+			class: "it-btn",
+			html: "OK",
+			click: function () {
+				me.hide();
+			}
+		});
+		btn.appendTo(MessageBox.find('.message-buttons'));
 	}
-
-	MessageBox.appendTo('body');
-
-	setTimeout(() => this.show(), 100);
 
 	this.show = function () {
 		MessageBox.show();
@@ -1253,180 +1225,161 @@ function MessageBox(params) {
 		return id;
 	}
 
-	return me;
+	MessageBox.appendTo('body');
+	setTimeout(() => this.show(), 100);
+
+	return this;
 }
 
 function ComboBox(params) {
 	var settings = $.extend({
-		dataIndex: 'combo',
-		value: 'Button',
+		dataIndex: '',
+		value: '',
 		emptyText: '',
-		format: null,
-		defaultValue: '',
 		autoLoad: true,
 		allowBlank: true,
 		disabled: false,
+		readonly: false,
 		width: '',
-		temp: false,
-		datasource: {
+		dataSource: {
 			type: 'array',
-			data: null,
 			url: '',
-		}
+			data: [],
+		},
 	}, params);
 
-	var me = this;
+	var id = settings.dataIndex ? settings.dataIndex : makeid();
 	var parent = null;
-	var word = null;
-	var datatemp = null;
 
-	me.events = new Event(me, settings);
+	var template = $('<select/>', {
+		class: "it-form-control",
+		name: settings.dataIndex,
+		id: settings.dataIndex
+	});
 
-	me.onLoad = function (act) {
-		me.events.add("onLoad", act);
+	if (settings.width)
+		template.width(settings.width);
+
+	if (settings.readOnly)
+		template.prop('readonly', settings.readOnly);
+
+	if (settings.disabled)
+		template.prop('disabled', settings.disabled);
+
+	if (!settings.allowBlank)
+		template.prop('required', true);
+
+	template.blur((e) => {
+		var valid = e.target.checkValidity();
+		template[!valid ? "addClass" : "removeClass"]('invalid');
+	});
+
+	this.events = new Event(this, settings);
+	this.events.add("hide", () => template.hide());
+	this.events.add("show", () => template.show());
+	this.events.set(template);
+
+	this.onLoad = (act) => this.events.add("onLoad", act);
+	this.getId = function () {
+		return settings.dataIndex;
 	}
-	me.onComplete = function (act) {
-		me.events.add("onComplete", act);
+
+	this.getDom = function () {
+		return template;
 	}
 
-	var disabled = settings.disabled == true ? "disabled" : "";
-	var $width = settings.width != '' ? 'style="width:' + settings.width + 'px;"' : '';
-	var konten = '<div class="it-combobox-wrap"><select ' + $width + ' name="' + settings.dataIndex + '" id="' + settings.dataIndex + '" ' + getStyle(settings) + disabled + ' class="it-form-control"></select></div>';
-	var $konten = $(konten);
+	this.getSelected = function () {
+		return template.find('option:selected');
+	}
 
-	me.getDataSource = function (params) {
-		$konten.find("select").html('');
-
-		if (settings.emptyText) $konten.find("select").append("<option value=''>" + settings.emptyText);
-		if (settings.temp && datatemp != null) {
-			settings.datasource.type = 'array';
-			settings.datasource.data = datatemp;
-		}
-		var $value;
-		var $sel;
-		settings.datasource.params = params || settings.datasource.params;
-		if (settings.datasource.type == 'array') {
-			var row = settings.datasource.data;
-			if (row != null) {
-				for (var i = 0; i < row.length; i++) {
-					$value = settings.format != null ? settings.format.format(row[i].key, row[i].value) : row[i].value;
-					$sel = row[i].key == settings.defaultValue ? "selected" : "";
-					dataParams = typeof row[i].params != 'undefined' ? JSON.stringify(row[i].params) : '';
-					$konten.find("select").append("<option value='" + row[i].key + "' " + $sel + " data-params='" + dataParams + "'>" + $value);
-				}
-				if (typeof row != 'undefined' && row.length && row.length == 1) {
-					$konten.find("option[value='']").remove();
-					$konten.val(row[0].key);
-					$konten.trigger('change');
-				}
-				setTimeout(function () {
-					me.events.fire("onLoad", [row]);
-					me.events.fire("onComplete", [row]);
-				}, 1);
-			}
-		} else if (settings.datasource.type == 'ajax') {
-			$.ajax({
-				url: settings.datasource.url,
-				type: settings.datasource.method || "POST",
-				data: settings.datasource.params || {},
-				dataType: 'json',
-				success: function (data) {
-					var row = data.rows;
-					datatemp = row;
-					if (typeof row != 'undefined' && row.length) {
-						for (var i = 0; i < row.length; i++) {
-							$value = settings.format != null ? settings.format.format(row[i].key, row[i].value) : row[i].value;
-							$sel = row[i].key == settings.defaultValue ? "selected" : "";
-							$konten.find("select").append("<option value='" + row[i].key + "' " + $sel + " data-params='" + (typeof row[i].params != 'undefined' ? JSON.stringify(row[i].params) : '') + "'>" + $value);
-						}
-					}
-
-					if (settings.datasource.callback) {
-						settings.datasource.callback.call($konten, settings);
-					} else {
-						if (typeof row != 'undefined' && row.length && row.length == 1) {
-							$konten.find("option[value='']").remove();
-							$konten.val(row[0].key);
-							$konten.trigger('change');
-						}
-					}
-					me.events.fire("onLoad", [row]);
-					me.events.fire("onComplete", [row]);
-				}
-			});
+	this.val = function (v) {
+		if (typeof v != "undefined") {
+			template.find('option').filter('[value="' + v + '"]').prop("selected", true);
+		} else {
+			return template.find('option:selected').val();
 		}
 	}
 
-	if (settings.emptyText) $konten.find("select").append("<option value=''>" + settings.emptyText);
-	if (settings.autoLoad) {
+	this.getDataSource = function () {
+		template.empty();
+
+		if (settings.emptyText) {
+			template.append($('<option/>', {
+				val: '',
+				text: settings.emptyText
+			}));
+		}
+
+		switch (settings.dataSource.type) {
+			case 'array':
+				var data = typeof settings.dataSource.data !== "undefined" ? settings.dataSource.data : null;
+				if (data) {
+					$.each(data, (k, val) => {
+						var extraData = typeof val.data !== "undefined" ? val.data : null;
+						template.append($('<option/>', {
+							val: val.key,
+							text: val.value,
+							selected: (val.key == settings.value),
+							data: extraData
+						}));
+					});
+				}
+				this.events.fire("onLoad", [template, data]);
+				break;
+
+			case 'ajax':
+				$.ajax({
+					url: settings.dataSource.url,
+					type: settings.dataSource.method || "get",
+					data: settings.dataSource.params || {},
+					dataType: 'json',
+					success: (data) => {
+						var rows = typeof data.rows !== "undefined" ? data.rows : null;
+						if (rows && rows.length) {
+							$.each(rows, (k, val) => {
+								var extraData = typeof val.data !== "undefined" ? val.data : null;
+								template.append($('<option/>', {
+									val: val.key,
+									text: val.value,
+									selected: (val.key == settings.value),
+									data: extraData
+								}));
+							});
+						}
+						this.events.fire("onLoad", [template, rows]);
+					}
+				});
+				break;
+
+			default:
+				throw "type only available for ajax and array";
+				break;
+		}
+	}
+
+	this.getSettings = function () {
+		return settings;
+	}
+
+	this.setEnabled = function (enable) {
+		select.prop('disabled', !enable);
+	}
+
+	this.setDataSource = function (data) {
+		settings.dataSource = data;
 		me.getDataSource();
 	}
 
-	me.events.add("hide", function () {
-		$konten.hide();
-	});
-
-	me.events.add("show", function () {
-		$konten.show();
-	});
-
-	me.events.add("blur", function () {
-		var val = typeof me.val() != 'undefined' ? me.val() : '';
-		var invalid = false;
-
-		if (!settings.allowBlank && empty(val)) invalid = true;
-		if (val.length < settings.minlength && !empty(val)) invalid = true;
-
-		if (invalid) $(this).addClass("invalid");
-		else $(this).removeClass("invalid");
-	});
-
-	me.val = function (v) {
-		if (typeof v != "undefined") {
-			$konten.find('option').filter('[value="' + v + '"]').prop("selected", true);
-		} else {
-			return $konten.find('option:selected').val();
-		}
-	}
-
-	me.params = function () {
-		return $konten.find('option:selected').data("params");
-	}
-
-	me.disable = function (dis) {
-		$konten.find("select").attr("disabled", (dis == null || dis));
-	}
-	me.getDOM = function () {
-		return $konten;
-	}
-
-	$.extend(me, me.events.set($konten.find("select")));
-
-	me.renderTo = function (obj) {
-		if (typeof settings.infoHolder == 'object') {
-			$wrap = $('<div class=\"it-infoBox\"/>');
-			$konten = $wrap.append($konten);
-
-			var infoText = typeof settings.infoHolder.text != 'undefined' ? settings.infoHolder.text : '';
-			infoText = typeof settings.infoHolder.icon != 'undefined' ? '<span class="fa fa-' + settings.infoHolder.icon + '"></span>' : infoText;
-			$konten.prepend('<div class=\"keterangan ' + settings.infoHolder.position + '\"> ' + infoText + ' </div>');
-		}
-
-		$konten.appendTo(obj);
+	this.renderTo = function (obj) {
+		template.appendTo(obj);
 		parent = obj;
 	}
 
-	me.setDataSource = function (datasource) {
-		$.extend(settings.datasource, datasource);
-		me.getDataSource();
+	if (settings.autoLoad) {
+		this.getDataSource();
 	}
-	me.getSetting = function () {
-		return settings;
-	}
-	me.getId = function () {
-		return settings.dataIndex;
-	}
-	return me;
+
+	return this;
 }
 
 function HTML(params) {
@@ -1671,6 +1624,7 @@ function TextBox(params) {
 		readOnly: false,
 		allowBlank: true,
 		defaultValue: '',
+		placeholder: '',
 		css: {}
 	}, params);
 
@@ -1702,8 +1656,11 @@ function TextBox(params) {
 		class: 'it-form-control'
 	});
 
+	if (settings.placeholder)
+		input.attr('placeholder', settings.placeholder);
+
 	if (settings.defaultValue)
-		input.val(settings.defaultValue)
+		input.val(settings.defaultValue);
 
 	if (settings.disabled)
 		input.prop('disabled', settings.disabled);
@@ -1828,16 +1785,17 @@ function FlexBox(params) {
 		me.content.append(title);
 	}
 
-	for (var i = 0; i < items.length; i++) {
-		if (items[i] === null) continue;
+	$.each(settings.items, (k, val) => {
 		var item = null;
-		if (typeof items[i].renderTo == 'function') {
-			item = items[i];
-		} else if (typeof items[i] == 'object') {
-			item = createObject(items[i]);
+		if (typeof val.renderTo === 'function') {
+			val.renderTo(me.content);
+		} else if (typeof val === 'object') {
+			item = createObject(val);
+			if (item) {
+				item.renderTo(me.content);
+			}
 		}
-		item.renderTo(me.content);
-	}
+	});
 
 	me.renderTo = function (obj) {
 		this.content.appendTo(obj);
@@ -1852,7 +1810,6 @@ function FlexBox(params) {
 	}
 	return me;
 }
-
 // Deprecated
 function Panel(params) {
 	console.warn("Panel is depecated. For the future use FlexBox.");
