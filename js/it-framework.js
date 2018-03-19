@@ -956,7 +956,7 @@ function Button(params) {
 function Dialog(params) {
 	var settings = $.extend({
 		width: 300,
-		height: 300,
+		height: 100,
 		autoHeight: true,
 		items: [],
 		padding: 5,
