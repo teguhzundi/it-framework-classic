@@ -409,7 +409,6 @@ function DataTable(options) {
 					src: url + value
 				})
 					.css({
-						width: 80,
 						height: 80,
 						display: 'block',
 						margin: 'auto'
@@ -1041,9 +1040,9 @@ function Dialog(params) {
 
 	this.close = function () {
 		this.hide();
-		setTimeout(function () {
+		setTimeout(() => {
 			template.remove();
-			me.events.fire("onClose", []);
+			this.events.fire("onClose", []);
 		}, 600);
 	}
 
@@ -1293,7 +1292,7 @@ function ComboBox(params) {
 	}
 
 	this.val = function (v) {
-		if (typeof v != "undefined") {
+		if (typeof v !== "undefined") {
 			template.find('option').filter('[value="' + v + '"]').prop("selected", true);
 		} else {
 			return template.find('option:selected').val();
@@ -1482,7 +1481,6 @@ function Form(params) {
 			$itemsContainer.addClass('form-block');
 
 		for (var i = 0; i < settings.items.length; i++) {
-			if (settings.items[i] === null) continue;
 			var items = settings.items;
 			var item = null;
 			var tr =
@@ -1515,13 +1513,8 @@ function Form(params) {
 	}
 
 	me.setData = function (data) {
-		$.each(data, function (key, value) {
-			if ($konten.find("#" + key).attr("type") != "file") {
-				$konten.find("#" + key).val(value);
-				$konten.find("#" + key).find("option").filter('[value="' + value + '"]').prop("selected", true);
-				$konten.find("#" + key).prop("checked", (value == 1 ? true : false));
-			}
-		});
+		$konten.autofill(data);
+		console.info($konten);
 	}
 
 	// Deprecated

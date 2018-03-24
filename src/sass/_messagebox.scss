@@ -1,76 +1,3 @@
-/*
-.it-messagebox {
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	width: 400px;
-	height: auto;
-	visibility:hidden;
-	-webkit-backface-visibility: hidden;
-	-moz-backface-visibility: hidden;
-	backface-visibility: hidden;
-	
-	-webkit-transform: translateX(-50%) translateY(-50%);
-	-moz-transform: translateX(-50%) translateY(-50%);
-	-ms-transform: translateX(-50%) translateY(-50%);
-	transform: translateX(-50%) translateY(-50%);
-
-	z-index:999999;
-}
-.it-messagebox-s {
-	visibility:visible;
-}
-.it-messagebox-effect {
-	background: #FFF;
-	padding:2px;
-	position: relative;
-	margin:0 auto;
-	border-radius:4px;
-	
-	-webkit-transform: translateY(20%);
-	-moz-transform: translateY(20%);
-	-ms-transform: translateY(20%);
-	transform: translateY(20%);
-	opacity: 0;
-	-webkit-transition: all 0.3s;
-	-moz-transition: all 0.3s;
-	transition: all 0.3s;
-	box-shadow:0px 0px 5px rgba(0,0,0,.3);
-	
-}
-.it-messagebox .it-title {
-	border-radius:2px 2px 0 0;
-	box-shadow:0 2px 1px rgba(0,0,0,.1);
-	text-transform:none;
-	font-size:14px;
-	cursor:move;
-}
-.it-messagebox p {
-	font-size:13px;
-	line-height:1.5em;
-	margin-right:15px;
-}
-.it-messagebox #it-confirmBtn {
-	margin-bottom:10px;
-	display:block;
-	font-size:13px;
-	
-}
-.it-messagebox #it-confirmBtn.kanan a {
-	margin-right:10px;
-}
-.it-messagebox #it-confirmBtn.kiri a {
-	margin-right:10px;
-}
-.it-messagebox.it-messagebox-s .it-messagebox-effect {
-	-webkit-transform: translateY(0);
-	-moz-transform: translateY(0);
-	-ms-transform: translateY(0);
-	transform: translateY(0);
-	opacity: 1;
-}
-*/
-
 .it-messagebox {
     background: rgba(0, 0, 0, 0.5);
 	position: fixed;
@@ -80,13 +7,20 @@
 	@include align-items(center);
 	@include justify-content(center);
 
+	.it-title {
+		background: #f8f8f8;
+		text-align: center;
+		border: 0;
+	}
+
 	&-content {
 		background: #fff;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);	
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+		text-align: center;	
     }
     
     &-inner {
-        padding: 10px;
+		padding: 10px;
     }
 
     .message-buttons {
@@ -100,8 +34,8 @@
 
 .message-icon {
     @include size(63px, 68px);
-    display: inline-block;
-    vertical-align: middle;
+	display: block;
+	margin: 0 auto;
    
     &.alert,
     &.critical {
