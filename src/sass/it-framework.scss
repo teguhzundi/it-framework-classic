@@ -65,70 +65,14 @@
 @import "grid";
 @import "flexi";
 
-.it-label {  
-    display: inline-block;  
-    cursor: pointer;  
-    position: relative;  
-    padding-left: 25px;  
-    margin-right: 15px;  
-    font-size: 13px; 
-	text-transform:none;
-	font-family:Roboto
-}
-.it-checkbox {
-	display: none; 
-}
-
-.it-label:before {  
-    content: "";  
-    display: inline-block;  
-    width: 14px;  
-    height: 14px;  
-	border-radius:2px;
-    margin-right: 10px;  
-    position: absolute;  
-    left: 0; bottom: 3px;  
-    background: #cdeb8e; /* Old browsers */
-	background: -moz-linear-gradient(top,  #cdeb8e 0%, #a5c956 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#cdeb8e), color-stop(100%,#a5c956)); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top,  #cdeb8e 0%,#a5c956 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top,  #cdeb8e 0%,#a5c956 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top,  #cdeb8e 0%,#a5c956 100%); /* IE10+ */
-	background: linear-gradient(to bottom,  #cdeb8e 0%,#a5c956 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdeb8e', endColorstr='#a5c956',GradientType=0 ); /* IE6-9 */
-    box-shadow: inset 0px 2px 3px 0px rgba(0, 0, 0, .3), 0px 1px 0px 0px rgba(255, 255, 255, .8);  
-}  
-
-.it-label label:before {  
-    border-radius: 8px;  
-}  
-
-.it-checkbox:checked + label:before {  
-    content: "\2713";   
-    color: #333;  
-    font-size: 20px;  
-	font-weight:bold;
-    text-align: center;  
-    line-height: 18px;  
-} 
-
-
-.it-table-form.form-block .it-combobox-wrap {
-	display: block;
-}
-
-.it-table-form.form-block .it-combobox, 
-.it-table-form.form-block .it-textbox {
-	width: 100%;
-}
-
-.it-table-form.form-block .form-block-space > td {
-	padding-bottom: 10px;
-}
-
 .it-table-form > tr > td {
 	padding: 5px;
-	font-size: 13px;
+	font-size: 14px;
 	position: relative;
+
+	label {
+		font-weight: 500;
+		color: #666;
+	}
 }
 

@@ -1,4 +1,4 @@
-$form-control-height: 30px;
+$form-control-height: 33px;
 
 .it-form-control {
 	border: 1px solid #ced4da;
@@ -7,10 +7,15 @@ $form-control-height: 30px;
 	position: relative;
 	height: $form-control-height;
 	line-height: $form-control-height;
-	box-shadow: inset 0 1px 1px rgba(0, 0, 0, .1);
 	border-radius: 2px;
 	transition: all 0.3s;
 	width: 100%;
+
+	@at-root textarea {
+		line-height: 20px !important;
+		padding-top: 10px !important;
+		padding-bottom: 10px !important;
+	}
 
 	&.invalid {
 		border: 1px solid #f23a5d;

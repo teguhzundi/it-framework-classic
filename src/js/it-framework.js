@@ -31,11 +31,8 @@ function makeid() {
 	return text;
 }
 
-// Deleted Method
-function getStyle(obj) { }
-
 function createObject(settings) {
-	xtype = settings.xtype;
+	var xtype = settings.xtype;
 	var res = null;
 	switch (xtype) {
 		case "button":
@@ -784,8 +781,8 @@ function Menu(params) {
 
 	var clsDisabled = settings.disabled ? "disabled" : "";
 	var icon = settings.iconCls != '' ? '<span class="fa fa-' + settings.iconCls + '"></span>' : '';
-	var konten = '<a href="#@" id="' + id + '" ' + getStyle(settings) + ' class="it-btn ' + clsDisabled + '">' + icon + ' ' + settings.text + '</a><span class="tooDir" style="display:none"></span><ul data-arah="' + settings.direction + '"></ul>';
-	var $konten = $(konten);
+	var konten = '<a href="#@" id="' + id + '" class="it-btn ' + clsDisabled + '">' + icon + ' ' + settings.text + '</a><span class="tooDir" style="display:none"></span><ul data-arah="' + settings.direction + '"></ul>';
+	var content = $(konten);
 	for (var i = 0; i < items.length; i++) {
 		if (items[i] === null) continue;
 		var li = '<li></li>';
@@ -797,11 +794,11 @@ function Menu(params) {
 			item = createObject(items[i]);
 			item.renderTo(li);
 		}
-		$konten.eq(2).append(li);
+		content.eq(2).append(li);
 	}
 
 	me.renderTo = function (obj) {
-		$konten.appendTo(obj);
+		content.appendTo(obj);
 		parent = obj;
 
 		parent.click(function (e) {
@@ -921,12 +918,12 @@ function Button(params) {
 	var id = settings.id == '' ? makeid() : settings.id;
 	var icon = settings.iconCls != '' ? '<span class="fa fa-' + settings.iconCls + '"></span>' : '';
 	var clsDisabled = settings.disabled ? "disabled" : "";
-	var konten = '<a href="javascript:void(0)" id="' + id + '" class="it-btn ' + clsDisabled + ' ' + settings.btnCls + '" ' + getStyle(settings) + '>' + icon + ' ' + settings.text + '</a>';
-	var $konten = $(konten);
-	$konten.css(settings.css);
+	var konten = '<a href="javascript:void(0)" id="' + id + '" class="it-btn ' + clsDisabled + ' ' + settings.btnCls + '" >' + icon + ' ' + settings.text + '</a>';
+	var content = $(konten);
+	content.css(settings.css);
 
 	if (typeof settings.handler != 'undefined' && !settings.disabled) {
-		$konten.click(function () {
+		content.click(function () {
 			var handler = settings.handler;
 			if (typeof handler == 'function') {
 				handler.call();
@@ -936,10 +933,10 @@ function Button(params) {
 		});
 	}
 
-	$.extend(me, me.events.set($konten));
+	$.extend(me, me.events.set(content));
 
 	me.renderTo = function (obj) {
-		$konten.appendTo(obj);
+		content.appendTo(obj);
 		parent = obj;
 	}
 
@@ -1317,7 +1314,7 @@ function ComboBox(params) {
 						var extraData = typeof val.data !== "undefined" ? val.data : null;
 						template.append($('<option/>', {
 							val: val.key,
-							text: val.value,
+							html: val.value,
 							selected: (val.key == settings.value),
 							data: extraData
 						}));
@@ -1339,7 +1336,7 @@ function ComboBox(params) {
 								var extraData = typeof val.data !== "undefined" ? val.data : null;
 								template.append($('<option/>', {
 									val: val.key,
-									text: val.value,
+									html: val.value,
 									selected: (val.key == settings.value),
 									data: extraData
 								}));
@@ -1439,7 +1436,6 @@ function Form(params) {
 		css: {},
 		fieldDefaults: {
 			labelWidth: 100,
-			fieldType: 'text',
 			fieldBlock: false,
 		},
 		items: []
@@ -1447,7 +1443,8 @@ function Form(params) {
 
 	var me = this;
 	var parent = null;
-	var $konten = $('<form/>', {
+	var items = {};
+	var content = $('<form/>', {
 		method: settings.method,
 		action: settings.url,
 		name: settings.id,
@@ -1455,7 +1452,8 @@ function Form(params) {
 		enctype: 'multipart/form-data',
 		css: settings.css
 	});
-	$konten.on('keyup keypress', function (e) {
+
+	content.on('keyup keypress', function (e) {
 		var keyCode = e.keyCode || e.which;
 		if (keyCode === 13) {
 			e.preventDefault();
@@ -1468,131 +1466,95 @@ function Form(params) {
 		css: {
 			'display': 'none'
 		}
-	}).appendTo($konten);
+	}).appendTo(content);
 
-	var nItems = {};
 	if (settings.items.length > 0) {
-		var $itemsContainer = $('<table/>', {
-			class: 'it-table-form',
-			width: settings.width,
-		});
+		var container = $('<table/>', { class: 'it-table-form', width: settings.width });
 
-		if (settings.fieldDefaults.fieldBlock)
-			$itemsContainer.addClass('form-block');
+		$.each(settings.items, (k, component) => {
+			var label = "";
+			if (typeof component.fieldLabel !== "undefined" && component.fieldLabel) {
+				if (settings.fieldDefaults.fieldBlock) {
+					label = `<label>${component.fieldLabel}</label>`;
+				} else {
+					label = `<td width="${settings.fieldDefaults.labelWidth}"><label>${component.fieldLabel}</label></td>`;
+				}
+			}
 
-		for (var i = 0; i < settings.items.length; i++) {
-			var items = settings.items;
-			var item = null;
-			var tr =
-				`<tr>
-					<td width="${settings.fieldDefaults.labelWidth}">${items[i].fieldLabel}</td>
-					<td class="form-field ${getStyle(settings.items[i])}"></td>
-				</tr>`;
+			var tr = $(`
+				<tr>
+					${label}
+					<td><div class="form-field"></div></td>
+				</tr>
+			`);
 
 			if (settings.fieldDefaults.fieldBlock) {
-				var tr =
-					`<tr><td class="form-label">${items[i].fieldLabel}</td></tr>
-					 <tr class="form-block-space"><td class="form-field ${getStyle(settings.items[i])}"></td></tr>`;
+				tr = $(`
+					<tr>
+						<td>
+							${label}
+							<div class="form-field"></div>
+						</td>	
+					</tr>
+				`);
 			}
 
-			$tr = $(tr);
-			if (typeof items[i].renderTo === 'function') {
-				items[i].renderTo($tr.find('.form-field'));
-				item = items[i];
-				nItems[item.getId()] = item;
-			} else if (typeof items[i] === 'object') {
-				item = createObject(items[i]);
-				item.renderTo($tr.find('.form-field'));
-				nItems[item.getId()] = item;
+			var target = typeof component.type !== "undefined" && component.type == "hidden" ? content : tr.find('.form-field');
+			if (typeof component.renderTo === 'function') {
+				component.renderTo(target);
+				items[component.getId()] = component;
+			} else if (typeof component === 'object') {
+				var item = createObject(component);
+				item.renderTo(target);
+				items[item.getId()] = item;
+
+				if (component.type == "hidden") {
+					return true;
+				}
 			}
-
-			$tr.appendTo($itemsContainer);
-		}
-
-		$itemsContainer.appendTo($konten);
-	}
-
-	me.setData = function (data) {
-		$konten.autofill(data);
-		console.info($konten);
-	}
-
-	// Deprecated
-	me.validasi = function (msg) {
-		console.warn(".validasi() is deprecated, for the future please use .validate()");
-		var msg = typeof msg == 'undefined' ? true : msg;
-		var valid = true;
-		$.each(nItems, function (i, item) {
-			var allowBlank = typeof item.getSetting().allowBlank != "undefined" ? item.getSetting().allowBlank : true;
-			var minlength = typeof item.getSetting().minlength != "undefined" ? item.getSetting().minlength : 0;
-			var id = item.getId();
-			var obj = $("#" + id);
-			var val = typeof obj.find("option:selected").val() != 'undefined' ? obj.find("option:selected").val() : obj.val();
-
-			if (val == null) val = '';
-
-			obj.removeClass("invalid");
-
-			if (!allowBlank && val == "") {
-				obj.addClass("invalid");
-				valid = false;
-			}
-			if (val != "" && val.length < minlength) {
-				obj.addClass("invalid");
-				valid = false;
-			}
+			tr.appendTo(container);
 		});
-
-		if (valid == false && msg) {
-			new MessageBox({
-				type: 'critical',
-				width: '400',
-				title: 'Peringatan',
-				message: "Silahkan Lengkapi Kolom Berwarna Merah"
-			});
-		}
-
-		return valid;
+		container.appendTo(content);
 	}
 
-	me.getItem = function (idx) {
-		return nItems[idx];
+	this.setData = function (data) {
+		content.autofill(data);
 	}
 
-	me.serializeObject = function () {
-		console.warn(".serializeObject() is deprecated, for the future please use .serializeJSON()");
-		return $konten.serializeJSON();
+	this.getItem = function (index) {
+		return items[index];
 	}
 
 	this.serializeJSON = function () {
-		return $konten.serializeJSON();
+		return content.serializeJSON();
 	}
 
 	this.serialize = function () {
-		return $konten.serialize();
+		return content.serialize();
 	}
 
 	this.validate = function () {
 		var valid = false;
-		$konten.removeAttr('novalidate');
-		$konten.find('.it-form-control').blur();
-		$konten.find(':submit').click((e) => {
-			valid = $konten[0].checkValidity();
+		content.removeAttr('novalidate');
+		content.find('.it-form-control').blur();
+		content.find(':submit').click((e) => {
+			valid = content[0].checkValidity();
 			if (valid) {
 				e.preventDefault();
 			}
 		});
-		$konten.find(':submit').click();
+		content.find(':submit').click();
 		return valid;
 	}
 
 	this.renderTo = function (obj) {
-		$konten.appendTo(obj);
+		content.appendTo(obj);
 		parent = obj;
 	}
 
 	this.reset = function () {
-		$konten[0].reset();
+		content[0].reset();
+		content.find('input[type="hidden"]').val('');
 	}
 
 	this.getSetting = function () {
@@ -1603,7 +1565,7 @@ function Form(params) {
 		return id;
 	}
 
-	return me;
+	return this;
 }
 
 function TextBox(params) {
@@ -1672,19 +1634,19 @@ function TextBox(params) {
 		input[!valid ? "addClass" : "removeClass"]('invalid');
 	});
 
-	$konten = input;
-	$.extend(this, this.events.set($konten));
+	content = input;
+	$.extend(this, this.events.set(content));
 
 	this.val = function (v) {
 		if (typeof v == undefined) {
-			return $konten.val() || "";
+			return content.val() || "";
 		} else {
-			$konten.val(v);
+			content.val(v);
 		}
 	}
 
 	this.renderTo = function (obj) {
-		$konten.appendTo(obj);
+		content.appendTo(obj);
 		parent = obj;
 	}
 
@@ -1720,11 +1682,11 @@ function CheckBox(params) {
 	var parent = null;
 	disabled = settings.disabled > 0 ? ' disabled ' : '';
 
-	var konten = '<input type="checkbox" class="it-checkbox" name="' + settings.dataIndex + '" id="' + settings.dataIndex + '" value="' + settings.value + '" ' + maxlength + minlength + disabled + getStyle(settings) + '><label class="it-label" for="' + settings.dataIndex + '">' + settings.text + '</label>' + (settings.newLine ? '<BR>' : '');
-	var $konten = $(konten);
+	var konten = '<input type="checkbox" class="it-checkbox" name="' + settings.dataIndex + '" id="' + settings.dataIndex + '" value="' + settings.value + '" ' + maxlength + minlength + disabled + '><label class="it-label" for="' + settings.dataIndex + '">' + settings.text + '</label>' + (settings.newLine ? '<BR>' : '');
+	var content = $(konten);
 
 	me.renderTo = function (obj) {
-		$konten.appendTo(obj);
+		content.appendTo(obj);
 		parent = obj;
 	}
 
@@ -1803,6 +1765,7 @@ function FlexBox(params) {
 	}
 	return me;
 }
+
 // Deprecated
 function Panel(params) {
 	console.warn("Panel is depecated. For the future use FlexBox.");
