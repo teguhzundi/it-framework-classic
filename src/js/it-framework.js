@@ -530,7 +530,7 @@ function DataTable(options) {
 		DataTable.find('.it-grid-pagination')[settings.paging ? "show" : "hide"]();
 		DataTable.find('.it-grid-pagination > ul li > a').click((e) => {
 			if (me.store.dataChanged.length > 0 && !me.store.isSaved) {
-				var msg = MessageBox({
+				var msg = new MessageBox({
 					type: 'tanya',
 					width: '400',
 					title: 'Konfirmasi',
@@ -1215,9 +1215,7 @@ function MessageBox(params) {
 		buttons: [],
 	}, params);
 
-	var me = this;
-	var buttons = settings.buttons;
-	var MessageBox = $(`
+	this.content = $(`
 		<div class="it-messagebox">
 			<div class="it-messagebox-content">
 				<div class="it-title">${settings.title}</div>
@@ -1232,60 +1230,49 @@ function MessageBox(params) {
 		</div>
 	`);
 
-	MessageBox.find('.it-messagebox-content').css({
+	this.content.find('.it-messagebox-content').css({
 		'width': settings.width,
 		'min-height': settings.height
-	}).draggable({
-		handle: '.it-title',
-		appendTo: "body",
-		start: function () {
-			$(this).css({
-				"-webkit-transition": "none",
-				"-moz-transition": "none",
-				"-ms-transition": "none",
-				"transition": "none"
-			});
-		}
 	});
 
-	if (buttons.length) {
-		$.each(buttons, (k, v) => {
+	if (settings.buttons.length) {
+		$.each(settings.buttons, (k, v) => {
 			var btnClasses = v.btnCls != undefined ? v.btnCls : '';
 			var btn = $('<a/>', {
 				href: "javascript:void(0)",
 				html: v.text,
 				class: "it-btn",
-				click: function () {
+				click: () => {
 					var handler = v.handler != undefined ? v.handler : null;
 					if (typeof handler == 'function') {
 						handler.call();
 					} else if (typeof handler == 'string') {
 						window[handler]();
 					}
-					me.hide();
+					this.hide();
 				}
 			});
 			btn.addClass(btnClasses);
-			btn.appendTo(MessageBox.find('.message-buttons'));
+			btn.appendTo(this.content.find('.message-buttons'));
 		});
 	} else {
 		var btn = $('<a/>', {
 			href: "javascript:void(0)",
 			class: "it-btn",
 			html: "OK",
-			click: function () {
-				me.hide();
+			click: () => {
+				this.hide();
 			}
 		});
-		btn.appendTo(MessageBox.find('.message-buttons'));
+		btn.appendTo(this.content.find('.message-buttons'));
 	}
 
 	this.show = function () {
-		MessageBox.show();
+		this.content.show();
 	}
 
 	this.hide = function () {
-		MessageBox.remove();
+		this.content.remove();
 	}
 
 	this.getSetting = function () {
@@ -1293,10 +1280,11 @@ function MessageBox(params) {
 	}
 
 	this.getId = function () {
-		return id;
+		return null;
 	}
 
-	MessageBox.appendTo('body');
+	this.content.appendTo('body');
+
 	setTimeout(() => this.show(), 100);
 
 	return this;
