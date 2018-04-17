@@ -1,0 +1,10 @@
+.it {
+    &-img {
+        padding: 3px;
+        background: #fff;
+        border-radius: 4px;
+        border:1px solid #ccc;
+        box-shadow: 0 2px 4px rgba($color: #555, $alpha: 0.2);
+        display: block;
+    }
+}

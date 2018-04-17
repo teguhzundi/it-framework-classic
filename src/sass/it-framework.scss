@@ -9,29 +9,38 @@
 @import "core";
 @import "flex";
 
-.kanan, .R, .r, .right {  float: right; }
-.kiri, .L, .l, .left { float: left ;}
+.kanan, .R, .r, .right {
+    float: right;
+}
 
-.clear { clear:both; }
+.kiri, .L, .l, .left {
+    float: left;
+}
+
+.clear {
+    clear: both;
+}
+
 .clearfix {
-	zoom: 1;
+    zoom: 1;
 
-	&:before,
-	&:after {
-		content: ".";    
-		display: block;    
-		height: 0;    
-		overflow: hidden; 
-	}
+    &:before,
+    &:after {
+        content: ".";
+        display: block;
+        height: 0;
+        overflow: hidden;
+    }
 
-	&:after {
-		clear: both;
-	}
+    &:after {
+        clear: both;
+    }
 }
 
-.it-hide { 
-	display: none;
+.it-hide {
+    display: none;
 }
+
 /**
 **************************************************************** GLOBAL STYLE
 **/
@@ -43,17 +52,16 @@
 .it-grid,
 .it-imagebox,
 .it-dialog,
-.it-messagebox, {
-	@include boxSizing(border-box); 
-    outline: 0 none;
-	
-	line-height: 100%;
-	font-family: Roboto Arial, Helvetica, sans-serif;
-	font-size: 14px;
-	font-weight: normal;
-	-webkit-font-smoothing: antialiased;
-}
+.it-messagebox {
+    @include boxSizing(border-box);
 
+    outline: 0 none;
+    line-height: 100%;
+    font-family: Roboto Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    -webkit-font-smoothing: antialiased;
+}
 
 @import "title";
 @import "toolbar";
@@ -64,15 +72,15 @@
 @import "tab";
 @import "grid";
 @import "flexi";
+@import "image";
 
 .it-table-form > tr > td {
-	padding: 5px;
-	font-size: 14px;
-	position: relative;
+    padding: 5px;
+    font-size: 14px;
+    position: relative;
 
-	label {
-		font-weight: 500;
-		color: #666;
-	}
+    label {
+        font-weight: 500;
+        color: #666;
+    }
 }
-

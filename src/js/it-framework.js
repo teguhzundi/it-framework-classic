@@ -71,6 +71,9 @@ function createObject(settings) {
 		case "flexbox":
 			res = new FlexBox(settings);
 			break;
+		case "image":
+			res = new Image(settings);
+			break;
 		default:
 			res = null;
 			console.warn(settings.xtype + " is not registered.");
@@ -398,6 +401,14 @@ function DataTable(options) {
 					val: value,
 					checked: (value || value == "Y")
 				}).appendTo(div);
+			} else if (col.items) {
+				$.each(col.items, (k, val) => {
+					var item = createObject(val);
+					if (item) {
+						item.extraData = row;
+						item.renderTo(div);
+					}
+				});
 			}
 			// if image
 			else if (value && typeof col.image !== "undefined" && col.image) {
@@ -406,7 +417,7 @@ function DataTable(options) {
 					src: url + value
 				})
 					.css({
-						height: 80,
+						height: col.width - 10,
 						display: 'block',
 						margin: 'auto'
 					}).appendTo(div);
@@ -688,8 +699,8 @@ function Store(options) {
 	}
 	if (settings.autoLoad) me.load();
 	me.searchData = function (data, key, value) {
-		index = null;
-		for (i = 0; i < data.length; i++) {
+		var index = null;
+		for (var i = 0; i < data.length; i++) {
 			if (data[i][key] == value) {
 				index = i;
 				break;
@@ -742,7 +753,7 @@ function Store(options) {
 	}
 	me.cekData = function (index, column, data) {
 		if ($.trim(me.storeData.rows[index][column]) != $.trim(data)) {
-			rows = $.extend({
+			var rows = $.extend({
 				indexRow: index
 			}, me.storeData.rows[index]);
 			if (me.searchData(me.dataChanged, 'indexRow', index) == null) {
@@ -909,44 +920,59 @@ function Button(params) {
 		css: {},
 		disabled: false,
 		text: '',
-		id: '',
+		id: makeid(),
 	}, params);
 
-	var me = this;
-	var parent = null;
-	me.events = new Event(me, settings);
-	var id = settings.id == '' ? makeid() : settings.id;
-	var icon = settings.iconCls != '' ? '<span class="fa fa-' + settings.iconCls + '"></span>' : '';
-	var clsDisabled = settings.disabled ? "disabled" : "";
-	var konten = '<a href="javascript:void(0)" id="' + id + '" class="it-btn ' + clsDisabled + ' ' + settings.btnCls + '" >' + icon + ' ' + settings.text + '</a>';
-	var content = $(konten);
-	content.css(settings.css);
+	this.extraData = {};
+	this.events = new Event(this, settings);
+	this.content = $('<a/>', {
+		id: settings.id,
+		class: 'it-btn',
+		href: 'javascript:void(0)',
+		html: settings.text,
+	});
 
-	if (typeof settings.handler != 'undefined' && !settings.disabled) {
-		content.click(function () {
-			var handler = settings.handler;
-			if (typeof handler == 'function') {
-				handler.call();
-			} else if (typeof handler == 'string') {
-				window[handler]();
-			}
+	if (!$.isEmptyObject(settings.css))
+		this.content.css(settings.css);
+
+	if (settings.disabled)
+		this.content.addClass('disabled');
+
+	if (settings.btnCls)
+		this.content.addClass(settings.btnCls);
+
+	if (settings.iconCls) {
+		var icon = $('<i/>', { class: "mr-2 fa fa-" + settings.iconCls });
+		if (!settings.text)
+			icon.removeClass('mr-2');
+		this.content.prepend(icon)
+	}
+
+	if (typeof settings.handler !== 'undefined' && !settings.disabled) {
+		this.content.on('handler', (e, a, b) => {
+			settings.handler.call(null, a, b);
+		});
+		this.content.click(() => {
+			this.content.triggerHandler('handler', [this.content, this.extraData]);
 		});
 	}
 
-	$.extend(me, me.events.set(content));
+	$.extend(this, this.events.set(this.content));
 
-	me.renderTo = function (obj) {
-		content.appendTo(obj);
+	this.renderTo = function (obj) {
+		this.content.appendTo(obj);
 		parent = obj;
 	}
 
-	me.getSetting = function () {
+	this.getSetting = function () {
 		return settings;
 	}
-	me.getId = function () {
-		return id;
+
+	this.getId = function () {
+		return settings.id;
 	}
-	return me;
+
+	return this;
 }
 
 function Dialog(params) {
@@ -1050,6 +1076,55 @@ function Dialog(params) {
 	}
 
 	return this;
+}
+
+function Image(params) {
+	var settings = $.extend({
+		dataIndex: '',
+		width: 100,
+		height: 100,
+		src: '',
+		css: {},
+	}, params);
+
+	this.content = $('<img/>', {
+		src: settings.src,
+		class: "it-img",
+		attr: {
+			width: settings.width,
+			height: settings.height
+		}
+	});
+
+	if (!$.isEmptyObject(settings.css)) {
+		this.content.css(settings.css);
+	}
+
+	this.setSrc = function (src) {
+		this.content.attr('src', src);
+		return this;
+	}
+
+	this.setData = function (data) {
+		this.content.data(data);
+		return this;
+	}
+
+	this.getData = function () {
+		return this.content.data();
+	}
+
+	this.renderTo = function (obj) {
+		this.content.appendTo(obj);
+	}
+
+	this.getSetting = function () {
+		return settings;
+	}
+
+	this.getId = function () {
+		return settings.dataIndex;
+	}
 }
 
 function Tabs(params) {
@@ -1358,7 +1433,11 @@ function ComboBox(params) {
 	}
 
 	this.setEnabled = function (enable) {
-		select.prop('disabled', !enable);
+		template.prop('disabled', !enable);
+	}
+
+	this.setReadOnly = function (readOnly) {
+		template.attr('readonly', readOnly);
 	}
 
 	this.setDataSource = function (data) {
@@ -1452,6 +1531,7 @@ function Form(params) {
 		enctype: 'multipart/form-data',
 		css: settings.css
 	});
+	content.width('100%');
 
 	content.on('keyup keypress', function (e) {
 		var keyCode = e.keyCode || e.which;
@@ -1491,7 +1571,7 @@ function Form(params) {
 			if (settings.fieldDefaults.fieldBlock) {
 				tr = $(`
 					<tr>
-						<td>
+						<td width="100%">
 							${label}
 							<div class="form-field"></div>
 						</td>	
@@ -1765,6 +1845,47 @@ function FlexBox(params) {
 	}
 	return me;
 }
+
+function MediaDialog(params = {}) {
+	var params = $.extend({
+		title: "Ini Media",
+		thumbnailType: 'square',
+		sidebar: true,
+		submitText: "Submit",
+		submit: function () {
+
+		},
+	}, params);
+
+	var thumbnailType = {
+		square: 'square_',
+		thumbnail: 'thumb_',
+		medium: 's300_',
+		large: 's500_',
+		full: ''
+	};
+
+	var content = $(`
+		<div id="js-media-dialog" class="cm-media-dialog">
+			<div class="cm-media-dialog-wrapper">
+				<header class="cm-media-dialog-header">
+					${params.title}
+					<div class="cm-media-dialog-close"><i class="fa fa-times"></i></div>
+				</header>
+				<article class="cm-media-dialog-body">
+					<main class="cm-media-dialog-content">A</main>
+					<aside class="cm-media-dialog-side">B</aside>
+				</article>
+				<footer class="cm-media-dialog-footer">
+					<a href="#" class="btn btn-sm btn-primary">Tesss</a>
+				</footer>
+			</div>
+		</div>
+	`);
+
+	$('body').append(content);
+}
+
 
 // Deprecated
 function Panel(params) {
