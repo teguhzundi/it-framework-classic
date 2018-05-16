@@ -1593,6 +1593,10 @@ function Form(params) {
 		return items[index];
 	}
 
+	this.serializeFormData = function () {
+		return new FormData(content[0]);
+	}
+
 	this.serializeJSON = function () {
 		return content.serializeJSON();
 	}
