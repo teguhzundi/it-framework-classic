@@ -1706,7 +1706,7 @@ function TextBox(params) {
 		input[!valid ? "addClass" : "removeClass"]('invalid');
 	});
 
-	content = input;
+	var content = input;
 	$.extend(this, this.events.set(content));
 
 	this.val = function (v) {
