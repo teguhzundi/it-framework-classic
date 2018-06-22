@@ -6,6 +6,12 @@
   "repository": "https://github.com/teguhzundi/it-framework-classic.git",
   "author": "Teguh <teguhzundi@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "js": "babel src/js/it-framework.js --out-file js/it-framework-dist.js --presets=env,minify -w",
+    "css": "node-sass src/sass/it-framework.scss css/it-framework.css -w",
+    "dev": "concurrently --kill-others \"yarn js\" \"yarn css\"",
+    "build": "postcss --use autoprefixer --no-map css/it-framework.css -d css/"
+  },
   "devDependencies": {
     "autoprefixer": "^8.6.3",
     "babel-cli": "^6.26.0",
