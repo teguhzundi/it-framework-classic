@@ -11,7 +11,11 @@
         position: relative;
         
         &.fluid {
-            height: 100%;    
+			height: 100%;   
+			.it-grid-wrapper {
+				position: absolute;
+				top: 0; left: 0; right: 0; bottom: 0;
+			}
         }
 	}
 
@@ -21,11 +25,13 @@
 		z-index: 10;
 	}
 
-	&-wrapper{
-		@include flex(1);
+	&-wrapper-outer {
+		flex-basis: 100%;
 		overflow: auto;
-        border-collapse: collapse;
+		border-collapse: collapse;
+		position: relative;
 	}
+
 	
 	table { 
 		border-collapse: collapse; 
@@ -177,7 +183,7 @@
 	&-pagination {
 		background: #fff;
 		border-top: 1px solid #eeee;
-		padding: 3px;
+		padding: 3px 0 5px;
 		position: relative;
 		@include flexbox();
 		@include justify-content(center);

@@ -151,18 +151,18 @@ function DataTable(options) {
 	}, options);
 
 	var me = this;
-	var parent = null;
 	var id = settings.id == "" ? makeid() : settings.id;
-	var lastRow = null;
 	var DataTable = $(`
 		<div class="it-grid">
 			<div class="it-grid-container">
 				<div class="it-grid-header-fix"></div>
-				<div class="it-grid-wrapper">
-					<table border="1" width="100%">
-						<thead></thead>
-						<tbody></tbody>
-					</table>
+				<div class="it-grid-wrapper-outer">
+					<div class="it-grid-wrapper">
+						<table border="1" width="100%">
+							<thead></thead>
+							<tbody></tbody>
+						</table>
+					</div>
 				</div>
 				<nav class="it-grid-pagination">
 					<ul>

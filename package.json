@@ -8,8 +8,8 @@
   "license": "MIT",
   "scripts": {
     "js": "babel src/js --out-file js/it-framework-dist.js --presets=env -w",
-    "jsMin": "babel src/js --out-file js/it-framework-dist.min.js --presets=env,minify -w",
-    "css": "node-sass src/sass/it-framework.scss css/it-framework.css -w",
+    "jsMin": "babel src/js --out-file js/it-framework-dist.min.js --presets=env,minify -w --source-maps inline",
+    "css": "node-sass src/sass/it-framework.scss css/it-framework.css -w --output-style compressed",
     "dev": "concurrently --kill-others \"yarn js\" \"yarn jsMin\" \"yarn css\"",
     "build": "postcss --use autoprefixer --no-map css/it-framework.css -d css/"
   },
