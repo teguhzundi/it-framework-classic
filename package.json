@@ -1,0 +1,26 @@
+{
+  "name": "it-framework-classic",
+  "version": "1",
+  "description": "for everyone js framework",
+  "main": "index.js",
+  "repository": "https://github.com/teguhzundi/it-framework-classic.git",
+  "author": "Teguh <teguhzundi@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^8.6.3",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-minify": "^0.4.3",
+    "babel-watch": "^2.0.7",
+    "concurrently": "^3.5.1",
+    "node-sass": "^4.9.0",
+    "postcss": "^6.0.23",
+    "postcss-cli": "^5.0.1"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not ie < 11",
+    "Android >= 4",
+    "iOS >= 9"
+  ]
+}
