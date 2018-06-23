@@ -981,6 +981,7 @@ function Dialog(params) {
 		height: 100,
 		autoHeight: true,
 		items: [],
+		itemsFooter: [],
 		padding: 5,
 		modal: true,
 		clear: false,
@@ -997,27 +998,12 @@ function Dialog(params) {
 			<div class="it-dialog-content">
 				<div class="it-title">${icon} ${settings.title}</div> 
 				<div class="it-dialog-inner"></div>
+				<div class="it-dialog-footer"></div>
 			</div>
 		</div>
 	`);
 	template.find('.it-dialog-content').width(settings.width);
 	template.find('.it-dialog-content').css(settings.autoHeight ? 'min-height' : 'height', settings.height);
-	template.find('.it-dialog-content').css('overflow-y', settings.autoHeight ? 'none' : 'auto');
-
-	/*
-	template.find('.it-dialog-content').draggable({
-		handle: '.it-title',
-		appendTo: "body",
-		start: function () {
-			$(this).css({
-				"-webkit-transition": "none",
-				"-moz-transition": "none",
-				"-ms-transition": "none",
-				"transition": "none"
-			});
-		}
-	});
-	*/
 
 	this.events = new Event(this, settings);
 	this.afterShow = (act) => this.events.add("afterShow", act);
@@ -1033,6 +1019,20 @@ function Dialog(params) {
 			item = createObject(val);
 			if (item) {
 				item.renderTo(template.find(".it-dialog-inner"));
+				items.push(item);
+			}
+		}
+	});
+
+	$.each(settings.itemsFooter, (k, val) => {
+		var item = null;
+		if (typeof val.renderTo === 'function') {
+			val.renderTo(template.find('.it-dialog-footer'));
+			items.push(val);
+		} else if (typeof val === 'object') {
+			item = createObject(val);
+			if (item) {
+				item.renderTo(template.find(".it-dialog-footer"));
 				items.push(item);
 			}
 		}
@@ -1056,6 +1056,7 @@ function Dialog(params) {
 	}
 
 	this.show = function () {
+		template.show();
 		this.events.fire("afterShow", []);
 	}
 

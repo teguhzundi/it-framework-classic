@@ -8,15 +8,18 @@
 	@include justify-content(center);
 
 	&-content {
+		display: flex;
+		flex-direction: column;
 		background: #fff;
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);	
 	}
 
 	&-inner {
-		@include flexbox();
-		@include flex-direction(column);
+		flex-basis: 100%;
+		overflow-y: auto;
+		overflow-x: hidden;
 	}
-
+	
 	.it-toolbar {
 		width: 100%;
 		background: #f3f3f3;
