@@ -975,22 +975,25 @@ function Dialog(params) {
 	var id = makeid();
 	var icon = settings.iconCls != '' ? '<span class="fa fa-' + settings.iconCls + '"></span>' : '';
 	var items = [];
-	var template = $("\n\t\t<div class=\"it-dialog\">\n\t\t\t<div class=\"it-dialog-content\">\n\t\t\t\t<div class=\"it-title\">" + icon + " " + settings.title + "</div> \n\t\t\t\t<div class=\"it-dialog-inner\"></div>\n\t\t\t</div>\n\t\t</div>\n\t");
+	var template = $("\n\t\t<div id=\"" + id + "\" class=\"it-dialog\">\n\t\t\t<div class=\"it-dialog-content\">\n\t\t\t\t<div class=\"it-title\">" + icon + " " + settings.title + "</div> \n\t\t\t\t<div class=\"it-dialog-inner\"></div>\n\t\t\t</div>\n\t\t</div>\n\t");
 	template.find('.it-dialog-content').width(settings.width);
 	template.find('.it-dialog-content').css(settings.autoHeight ? 'min-height' : 'height', settings.height);
 	template.find('.it-dialog-content').css('overflow-y', settings.autoHeight ? 'none' : 'auto');
-	template.find('.it-dialog-content').draggable({
-		handle: '.it-title',
-		appendTo: "body",
-		start: function start() {
-			$(this).css({
-				"-webkit-transition": "none",
-				"-moz-transition": "none",
-				"-ms-transition": "none",
-				"transition": "none"
-			});
-		}
-	});
+
+	/*
+ template.find('.it-dialog-content').draggable({
+ 	handle: '.it-title',
+ 	appendTo: "body",
+ 	start: function () {
+ 		$(this).css({
+ 			"-webkit-transition": "none",
+ 			"-moz-transition": "none",
+ 			"-ms-transition": "none",
+ 			"transition": "none"
+ 		});
+ 	}
+ });
+ */
 
 	this.events = new Event(this, settings);
 	this.afterShow = function (act) {
@@ -1043,6 +1046,10 @@ function Dialog(params) {
 		this.close();
 	};
 
+	this.isShow = function () {
+		return this.template.is(':visible');
+	};
+
 	this.close = function () {
 		var _this8 = this;
 
@@ -1055,8 +1062,8 @@ function Dialog(params) {
 
 	$('body').append(template);
 
-	if (settings.autoShow) {
-		this.show();
+	if (!settings.autoShow) {
+		this.hide();
 	}
 
 	return this;
