@@ -57,7 +57,7 @@
 
     outline: 0 none;
     line-height: 100%;
-    font-family: Roboto Arial, Helvetica, sans-serif;
+    font-family: Roboto;
     font-size: 14px;
     font-weight: normal;
     -webkit-font-smoothing: antialiased;
@@ -65,6 +65,7 @@
 
 @import "title";
 @import "toolbar";
+@import "form";
 @import "form_control";
 @import "dialog";
 @import "messagebox";
@@ -73,15 +74,3 @@
 @import "grid";
 @import "flexi";
 @import "image";
-
-.it-table-form > tr > td {
-    padding: 5px;
-    font-size: 14px;
-    position: relative;
-    vertical-align: top;
-
-    label {
-        font-weight: 500;
-        color: #666;
-    }
-}

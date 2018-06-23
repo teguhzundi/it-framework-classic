@@ -1,0 +1,18 @@
+.it-form {
+    &-group {
+        display: flex;
+        margin-bottom: 20px;
+
+        &.block-view {
+            flex-direction: column;
+
+            .form-label {
+                margin-bottom: 10px;
+            }
+        }
+
+        .form-label {
+            font-weight: 500;
+        }
+    }
+}

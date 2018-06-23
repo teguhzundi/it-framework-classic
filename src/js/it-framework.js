@@ -380,7 +380,9 @@ function DataTable(options) {
 	}
 
 	this.createRows = function (row) {
-		var tr = $('<tr/>', { css: settings.cssInjectRow }).appendTo(DataTable.find("tbody"));
+		var tr = $('<tr/>', {
+			css: settings.cssInjectRow
+		}).appendTo(DataTable.find("tbody"));
 		$.each(settings.columns, (colIndex, col) => {
 			var div = $('<div/>', {
 				width: typeof col.width !== "undefined" ? col.width : "",
@@ -414,8 +416,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-					src: url + value
-				})
+						src: url + value
+					})
 					.css({
 						height: col.width - 10,
 						display: 'block',
@@ -867,7 +869,6 @@ function ToolBar(params) {
 		items: []
 	}, params);
 
-	var parent = null;
 	var id = makeid();
 	var items = [];
 	var template = $(`
@@ -910,6 +911,10 @@ function ToolBar(params) {
 		return id;
 	}
 
+	this.getObject = function () {
+		return template;
+	}
+
 	return this;
 }
 
@@ -942,7 +947,9 @@ function Button(params) {
 		this.content.addClass(settings.btnCls);
 
 	if (settings.iconCls) {
-		var icon = $('<i/>', { class: "mr-2 fa fa-" + settings.iconCls });
+		var icon = $('<i/>', {
+			class: "mr-2 fa fa-" + settings.iconCls
+		});
 		if (!settings.text)
 			icon.removeClass('mr-2');
 		this.content.prepend(icon)
@@ -982,9 +989,6 @@ function Dialog(params) {
 		autoHeight: true,
 		items: [],
 		itemsFooter: [],
-		padding: 5,
-		modal: true,
-		clear: false,
 		title: '',
 		iconCls: '',
 		autoShow: true,
@@ -1066,7 +1070,7 @@ function Dialog(params) {
 	}
 
 	this.isShow = function () {
-		return this.template.is(':visible');
+		return template.is(':visible');
 	}
 
 	this.close = function () {
@@ -1077,11 +1081,15 @@ function Dialog(params) {
 		}, 600);
 	}
 
+	this.getObject = function () {
+		return template;
+	}
+
 	$('body').append(template);
 
 	if (!settings.autoShow) {
 		this.hide();
-	} 
+	}
 
 	return this;
 }
@@ -1507,7 +1515,7 @@ function Form(params) {
 		method: 'POST',
 		id: 'Fm',
 		url: '',
-		width: '100%',
+		width: 'auto',
 		css: {},
 		fieldDefaults: {
 			labelWidth: 100,
@@ -1516,8 +1524,6 @@ function Form(params) {
 		items: []
 	}, params);
 
-	var me = this;
-	var parent = null;
 	var items = {};
 	var content = $('<form/>', {
 		method: settings.method,
@@ -1537,7 +1543,7 @@ function Form(params) {
 		}
 	});
 
-	var submit = $('<input/>', {
+	$('<input/>', {
 		type: 'submit',
 		css: {
 			'display': 'none'
@@ -1545,50 +1551,41 @@ function Form(params) {
 	}).appendTo(content);
 
 	if (settings.items.length > 0) {
-		var container = $('<table/>', { class: 'it-table-form', width: settings.width });
+		var container = $('<div/>', {
+			class: 'it-form',
+			width: settings.width
+		});
 
 		$.each(settings.items, (k, component) => {
-			var label = "";
-			if (typeof component.fieldLabel !== "undefined" && component.fieldLabel) {
-				if (settings.fieldDefaults.fieldBlock) {
-					label = `<label>${component.fieldLabel}</label>`;
-				} else {
-					label = `<td width="${settings.fieldDefaults.labelWidth}"><label>${component.fieldLabel}</label></td>`;
-				}
+			let formGroup = $('<div/>', {
+				class: 'it-form-group'
+			});
+			formGroup.appendTo(container);
+			formGroup[settings.fieldDefaults.fieldBlock ? "addClass" : "removeClass"]('block-view');
+
+			if (typeof component.fieldLabel !== undefined && component.fieldLabel) {
+				let label = $('<label/>', {
+					class: 'form-label',
+					html: component.fieldLabel,
+					width: settings.fieldDefaults.fieldBlock ? 'auto' : settings.fieldDefaults.fieldLabel
+				});
+				label.appendTo(formGroup);
 			}
 
-			var tr = $(`
-				<tr>
-					${label}
-					<td><div class="form-field"></div></td>
-				</tr>
-			`);
-
-			if (settings.fieldDefaults.fieldBlock) {
-				tr = $(`
-					<tr>
-						<td width="100%">
-							${label}
-							<div class="form-field"></div>
-						</td>	
-					</tr>
-				`);
-			}
-
-			var target = typeof component.type !== "undefined" && component.type == "hidden" ? content : tr.find('.form-field');
 			if (typeof component.renderTo === 'function') {
-				component.renderTo(target);
+				component.renderTo(formGroup);
 				items[component.getId()] = component;
 			} else if (typeof component === 'object') {
 				var item = createObject(component);
-				item.renderTo(target);
-				items[item.getId()] = item;
+				if (item) {
+					item.renderTo(formGroup);
+					items[item.getId()] = item;
 
-				if (component.type == "hidden") {
-					return true;
+					if (component.type == "hidden") {
+						return true;
+					}
 				}
 			}
-			tr.appendTo(container);
 		});
 		container.appendTo(content);
 	}
@@ -1676,12 +1673,37 @@ function TextBox(params) {
 		});
 		if (settings.minlength) input.attr('minlength', settings.minlength);
 		if (settings.maxlength) input.attr('maxlength', settings.maxlength);
-		if (settings.type == 'numeric') {
-			input.keypress(function (e) {
-				if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
-					return false;
+
+		switch (settings.type) {
+			case 'numeric':
+				input.keypress(function (e) {
+					if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+						return false;
+					}
+				});
+				break;
+			case 'date':
+				if (typeof $.fn.datepicker !== 'undefined') {
+					let pickerOptions = $.extend({}, {
+						language: {
+							days: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+							daysShort: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+							daysMin: ['Mi', 'Sen', 'Sel', 'Ra', 'Ka', 'Ju', 'Sa'],
+							months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+							monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+							today: 'Hari Ini',
+							clear: 'Clear',
+							dateFormat: 'dd-mm-yyyy',
+							timeFormat: 'hh:ii',
+							firstDay: 0
+						},
+					}, typeof settings.pickerOptions !== 'undefined' ? settings.pickerOptions : {});
+					input.attr('type', 'text');
+					input.datepicker(pickerOptions);
+				} else {
+					console.info('Use native date, please install air-datepicker https://github.com/t1m0n/air-datepicker');
 				}
-			});
+				break;
 		}
 	}
 
@@ -1845,47 +1867,6 @@ function FlexBox(params) {
 	}
 	return me;
 }
-
-function MediaDialog(params = {}) {
-	var params = $.extend({
-		title: "Ini Media",
-		thumbnailType: 'square',
-		sidebar: true,
-		submitText: "Submit",
-		submit: function () {
-
-		},
-	}, params);
-
-	var thumbnailType = {
-		square: 'square_',
-		thumbnail: 'thumb_',
-		medium: 's300_',
-		large: 's500_',
-		full: ''
-	};
-
-	var content = $(`
-		<div id="js-media-dialog" class="cm-media-dialog">
-			<div class="cm-media-dialog-wrapper">
-				<header class="cm-media-dialog-header">
-					${params.title}
-					<div class="cm-media-dialog-close"><i class="fa fa-times"></i></div>
-				</header>
-				<article class="cm-media-dialog-body">
-					<main class="cm-media-dialog-content">A</main>
-					<aside class="cm-media-dialog-side">B</aside>
-				</article>
-				<footer class="cm-media-dialog-footer">
-					<a href="#" class="btn btn-sm btn-primary">Tesss</a>
-				</footer>
-			</div>
-		</div>
-	`);
-
-	$('body').append(content);
-}
-
 
 // Deprecated
 function Panel(params) {

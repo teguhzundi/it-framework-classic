@@ -20,11 +20,16 @@
     }
     
     &-inner {
-		padding: 10px;
+        padding: 10px;
+        line-height: 1.6em;
     }
 
     .message-buttons {
         padding: 8px;
+
+        &.float-right {
+            float: none !important;
+        }
 
         a:not(:first-of-type) {
             margin-left: 8px;
