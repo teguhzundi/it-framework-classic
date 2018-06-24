@@ -1591,7 +1591,11 @@ function Form(params) {
 	}
 
 	this.setData = function (data) {
-		content.autofill(data);
+		if (typeof $.fn.autofill !== 'undefined') {
+			content.autofill(data);
+		} else {
+			console.info('For use, please install https://github.com/creative-area/jQuery-form-autofill.git');
+		}
 	}
 
 	this.getItem = function (index) {
