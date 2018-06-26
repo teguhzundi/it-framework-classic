@@ -4,7 +4,6 @@
     height: 32px;
     line-height: 32px;
     color: #333;
-    font-weight: bold;
     white-space: nowrap;
     vertical-align: middle;
     border: 1px solid #ddd;
@@ -13,9 +12,10 @@
     cursor: pointer;
     text-decoration: none;
     font-size: 13px;
+    font-weight: bolder;
     text-align: center;
 
-    @include transition(all 0.3s);
+    @include transition(all 0.5s cubic-bezier(0.165, 0.840, 0.440, 1.000));
 
     &:hover {
         text-decoration: none;

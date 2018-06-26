@@ -38,6 +38,10 @@
 		position: relative;
 		
 		tr {
+			&:nth-child(even) {
+				background: #fdfdfd;
+			}
+			
 			&:hover { 
 				background: #f8f8f8; 
 				
@@ -46,6 +50,7 @@
 
 			&.it-grid-selected {
 				background: #007BFF;
+
 				td {
 					color: #fff;
 				}
@@ -90,8 +95,15 @@
 				font-family: Roboto;
 				font-size: 13px;
 
-				$height: 27px;
-				
+				.it-btn {
+					font-size: 12px;
+					font-weight: normal;
+					line-height: 20px;
+					padding: 0 10px;
+					height: 20px;
+				}
+
+				$height: 27px;				
 				div {
 					padding: 0 8px;
 					white-space: nowrap;
@@ -108,7 +120,7 @@
 						overflow: none;
 						line-height: 1.4em;
 						height: auto;
-						padding: 10px;
+						padding: 5px 8px;
 					}
 				}
 
@@ -163,18 +175,9 @@
 							position: absolute;
 							top: -4px;
 							left: -4px;
-							-webkit-transform: rotate(135deg);
-							-moz-transform: rotate(135deg);
-							-ms-transform: rotate(135deg);
-							-o-transform: rotate(135deg);
+							transform: rotate(135deg);
 						}
 					}
-				}
-			}
-			
-			&:last-child {
-				td {
-					border-bottom-color: #fff;
 				}
 			}
 		}		
