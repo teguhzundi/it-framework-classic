@@ -1075,10 +1075,8 @@ function Dialog(params) {
 
 	this.close = function () {
 		this.hide();
-		setTimeout(() => {
-			template.remove();
-			this.events.fire("onClose", []);
-		}, 600);
+		template.remove();
+		this.events.fire("onClose", []);
 	}
 
 	this.getObject = function () {
@@ -1089,6 +1087,8 @@ function Dialog(params) {
 
 	if (!settings.autoShow) {
 		this.hide();
+	} else {
+		this.show();
 	}
 
 	return this;

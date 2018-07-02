@@ -1055,13 +1055,9 @@ function Dialog(params) {
 	};
 
 	this.close = function () {
-		var _this8 = this;
-
 		this.hide();
-		setTimeout(function () {
-			template.remove();
-			_this8.events.fire("onClose", []);
-		}, 600);
+		template.remove();
+		this.events.fire("onClose", []);
 	};
 
 	this.getObject = function () {
@@ -1072,6 +1068,8 @@ function Dialog(params) {
 
 	if (!settings.autoShow) {
 		this.hide();
+	} else {
+		this.show();
 	}
 
 	return this;
@@ -1205,7 +1203,7 @@ function Tabs(params) {
 }
 
 function MessageBox(params) {
-	var _this9 = this;
+	var _this8 = this;
 
 	var settings = $.extend({
 		type: 'info',
@@ -1237,11 +1235,11 @@ function MessageBox(params) {
 					} else if (typeof handler == 'string') {
 						window[handler]();
 					}
-					_this9.hide();
+					_this8.hide();
 				}
 			});
 			btn.addClass(btnClasses);
-			btn.appendTo(_this9.content.find('.message-buttons'));
+			btn.appendTo(_this8.content.find('.message-buttons'));
 		});
 	} else {
 		var btn = $('<a/>', {
@@ -1249,7 +1247,7 @@ function MessageBox(params) {
 			class: "it-btn",
 			html: "OK",
 			click: function click() {
-				_this9.hide();
+				_this8.hide();
 			}
 		});
 		btn.appendTo(this.content.find('.message-buttons'));
@@ -1274,14 +1272,14 @@ function MessageBox(params) {
 	this.content.appendTo('body');
 
 	setTimeout(function () {
-		return _this9.show();
+		return _this8.show();
 	}, 100);
 
 	return this;
 }
 
 function ComboBox(params) {
-	var _this10 = this;
+	var _this9 = this;
 
 	var settings = $.extend({
 		dataIndex: '',
@@ -1331,7 +1329,7 @@ function ComboBox(params) {
 	this.events.set(template);
 
 	this.onLoad = function (act) {
-		return _this10.events.add("onLoad", act);
+		return _this9.events.add("onLoad", act);
 	};
 	this.getId = function () {
 		return settings.dataIndex;
@@ -1354,7 +1352,7 @@ function ComboBox(params) {
 	};
 
 	this.getDataSource = function () {
-		var _this11 = this;
+		var _this10 = this;
 
 		template.empty();
 
@@ -1401,7 +1399,7 @@ function ComboBox(params) {
 								}));
 							});
 						}
-						_this11.events.fire("onLoad", [template, rows]);
+						_this10.events.fire("onLoad", [template, rows]);
 					}
 				});
 				break;
