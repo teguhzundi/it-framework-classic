@@ -76,7 +76,7 @@ function createObject(settings) {
 			res = new FlexBox(settings);
 			break;
 		case "image":
-			res = new Image(settings);
+			res = new Image2(settings);
 			break;
 		default:
 			res = null;
@@ -1076,7 +1076,7 @@ function Dialog(params) {
 	return this;
 }
 
-function Image(params) {
+function Image2(params) {
 	var settings = $.extend({
 		dataIndex: '',
 		width: 100,
