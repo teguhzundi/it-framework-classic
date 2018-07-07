@@ -475,7 +475,8 @@ function DataTable(options) {
 	};
 
 	this.removeRow = function (row) {
-		var deleted = this.data.rows.splice(row, 1);
+		this.data.rows.splice(row, 1);
+		this.store.storeData.rows.splice(row, 1);
 		DataTable.find("tbody > tr:eq(" + row + ")").fadeOut(100, function () {
 			$(this).remove();
 		});
@@ -1585,7 +1586,11 @@ function Form(params) {
 	};
 
 	this.serializeJSON = function () {
-		return content.serializeJSON();
+		if (typeof $.fn.serializeJSON !== 'undefined') {
+			return content.serializeJSON();
+		} else {
+			console.info('Must install jQuery serializeJSON.');
+		}
 	};
 
 	this.serialize = function () {
