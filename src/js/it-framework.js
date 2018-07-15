@@ -1608,7 +1608,7 @@ function Form(params) {
 	}
 
 	this.serializeJSON = function () {
-		if(typeof $.fn.serializeJSON !== 'undefined') {
+		if (typeof $.fn.serializeJSON !== 'undefined') {
 			return content.serializeJSON();
 		} else {
 			console.info('Must install jQuery serializeJSON.');
