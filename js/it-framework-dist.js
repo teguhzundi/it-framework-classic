@@ -208,6 +208,8 @@ function DataTable(options) {
 	this.load = function () {
 		var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
+		_this2.selectedColumn = null;
+		_this2.selectedRecord = null;
 		if (me.data) {
 			// Empty table body
 			DataTable.find("tbody").empty();
@@ -1286,6 +1288,7 @@ function ComboBox(params) {
 		dataIndex: '',
 		value: '',
 		emptyText: '',
+		emptyValue: '',
 		autoLoad: true,
 		allowBlank: true,
 		disabled: false,
@@ -1359,7 +1362,7 @@ function ComboBox(params) {
 
 		if (settings.emptyText) {
 			template.append($('<option/>', {
-				val: '',
+				val: settings.emptyValue,
 				text: settings.emptyText
 			}));
 		}
@@ -1561,6 +1564,7 @@ function Form(params) {
 					items[item.getId()] = item;
 
 					if (component.type == "hidden") {
+						formGroup.addClass("form-hidden");
 						return true;
 					}
 				}

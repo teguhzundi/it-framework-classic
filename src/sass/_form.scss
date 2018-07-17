@@ -3,6 +3,10 @@
         display: flex;
         margin-bottom: 20px;
 
+        &.form-hidden {
+            display: none;
+        }
+
         &:last-child {
             margin-bottom: 0;
         }

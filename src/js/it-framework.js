@@ -226,6 +226,8 @@ function DataTable(options) {
 
 	// End : Store Data
 	this.load = (opt = {}) => {
+		this.selectedColumn = null;
+		this.selectedRecord = null;
 		if (me.data) {
 			// Empty table body
 			DataTable.find("tbody").empty();
@@ -416,8 +418,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-						src: url + value
-					})
+					src: url + value
+				})
 					.css({
 						height: col.width - 10,
 						display: 'block',
@@ -1312,6 +1314,7 @@ function ComboBox(params) {
 		dataIndex: '',
 		value: '',
 		emptyText: '',
+		emptyValue: '',
 		autoLoad: true,
 		allowBlank: true,
 		disabled: false,
@@ -1381,7 +1384,7 @@ function ComboBox(params) {
 
 		if (settings.emptyText) {
 			template.append($('<option/>', {
-				val: '',
+				val: settings.emptyValue,
 				text: settings.emptyText
 			}));
 		}
@@ -1583,6 +1586,7 @@ function Form(params) {
 					items[item.getId()] = item;
 
 					if (component.type == "hidden") {
+						formGroup.addClass("form-hidden");
 						return true;
 					}
 				}
