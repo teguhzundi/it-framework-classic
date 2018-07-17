@@ -1,3 +1,7 @@
+/*
+
+Deprecated
+
 String.prototype.format = function () {
 	tmp = arguments;
 	return this.replace(/\{(\d+)\}/g, function (m, i) {
@@ -22,6 +26,7 @@ Array.prototype.insert = function (index, item) {
 function empty(value) {
 	return !value;
 }
+*/
 
 function makeid() {
 	var text = "";
@@ -1454,7 +1459,9 @@ function ComboBox(params) {
 	}
 
 	this.renderTo = function (obj) {
-		template.appendTo(obj);
+		let wrapper = $('<div/>', { class: "it-form-control-select" });
+		template.appendTo(wrapper);
+		wrapper.appendTo(obj);
 		parent = obj;
 	}
 
@@ -1483,7 +1490,7 @@ function HTML(params) {
 		class: settings.class
 	});
 
-	if (empty(settings.url)) {
+	if (!settings.url) {
 		if (typeof settings.content === 'string') {
 			content.html(settings.content);
 		} else {

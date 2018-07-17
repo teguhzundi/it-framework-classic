@@ -2,16 +2,20 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+/*
+
+Deprecated
+
 String.prototype.format = function () {
 	tmp = arguments;
 	return this.replace(/\{(\d+)\}/g, function (m, i) {
 		return tmp[i];
 	});
-};
+}
 
 Array.prototype.remove = function (name, value) {
 	var rest = $.grep(this, function (item) {
-		return item[name] !== value;
+		return (item[name] !== value);
 	});
 
 	this.length = 0;
@@ -26,6 +30,7 @@ Array.prototype.insert = function (index, item) {
 function empty(value) {
 	return !value;
 }
+*/
 
 function makeid() {
 	var text = "";
@@ -1432,7 +1437,9 @@ function ComboBox(params) {
 	};
 
 	this.renderTo = function (obj) {
-		template.appendTo(obj);
+		var wrapper = $('<div/>', { class: "it-form-control-select" });
+		template.appendTo(wrapper);
+		wrapper.appendTo(obj);
 		parent = obj;
 	};
 
@@ -1461,7 +1468,7 @@ function HTML(params) {
 		class: settings.class
 	});
 
-	if (empty(settings.url)) {
+	if (!settings.url) {
 		if (typeof settings.content === 'string') {
 			content.html(settings.content);
 		} else {
