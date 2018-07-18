@@ -2,36 +2,6 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-/*
-
-Deprecated
-
-String.prototype.format = function () {
-	tmp = arguments;
-	return this.replace(/\{(\d+)\}/g, function (m, i) {
-		return tmp[i];
-	});
-}
-
-Array.prototype.remove = function (name, value) {
-	var rest = $.grep(this, function (item) {
-		return (item[name] !== value);
-	});
-
-	this.length = 0;
-	this.push.apply(this, rest);
-	return this;
-};
-
-Array.prototype.insert = function (index, item) {
-	this.splice(index, 0, item);
-};
-
-function empty(value) {
-	return !value;
-}
-*/
-
 function makeid() {
 	var text = "";
 	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -79,9 +49,6 @@ function createObject(settings) {
 			break;
 		case "flexbox":
 			res = new FlexBox(settings);
-			break;
-		case "image":
-			res = new Image2(settings);
 			break;
 		default:
 			res = null;
@@ -1083,7 +1050,7 @@ function Dialog(params) {
 	return this;
 }
 
-function Image2(params) {
+function ImageBox(params) {
 	var settings = $.extend({
 		dataIndex: '',
 		width: 100,
@@ -1464,6 +1431,52 @@ function HTML(params) {
 	var me = this;
 	var id = settings.id == '' ? makeid() : settings.id;
 	var parent = null;
+	var content = $('<div/>', {
+		id: id,
+		css: settings.css,
+		class: settings.class
+	});
+
+	if (!settings.url) {
+		if (typeof settings.content === 'string') {
+			content.html(settings.content);
+		} else {
+			var htmlKonten = _typeof(settings.content) === 'object' ? settings.content : $(settings.content);
+			htmlKonten.appendTo(content);
+		}
+	} else {
+		content.load(settings.url);
+	}
+
+	me.setContent = function (html) {
+		content.html(html);
+	};
+
+	me.renderTo = function (obj) {
+		content.appendTo(obj);
+		parent = obj;
+	};
+
+	me.getSetting = function () {
+		return settings;
+	};
+
+	me.getId = function () {
+		return id;
+	};
+
+	return me;
+}
+
+function Content(params) {
+	var settings = $.extend({
+		id: '',
+		class: '',
+		css: {},
+		items: []
+	}, params);
+
+	var id = settings.id ? makeid() : settings.id;
 	var content = $('<div/>', {
 		id: id,
 		css: settings.css,
