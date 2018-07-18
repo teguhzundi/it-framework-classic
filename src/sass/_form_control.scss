@@ -35,12 +35,11 @@ $form-control-height: 33px;
 	&-select {
 		position: relative;
 		display: block;
-		background: #f8f8f8;
+		background: #fff;
 		border: 1px solid #ced4da;
 		z-index: 1;
 		color: #000;
 		border-radius: 3px;
-		box-shadow: 0 1px 1px rgba($color: #666, $alpha: .1);
 
 		select {
 			border: none;

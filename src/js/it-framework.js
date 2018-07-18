@@ -423,8 +423,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-					src: url + value
-				})
+						src: url + value
+					})
 					.css({
 						height: col.width - 10,
 						display: 'block',
@@ -1459,7 +1459,9 @@ function ComboBox(params) {
 	}
 
 	this.renderTo = function (obj) {
-		let wrapper = $('<div/>', { class: "it-form-control-select" });
+		let wrapper = $('<div/>', {
+			class: "it-form-control-select"
+		});
 		template.appendTo(wrapper);
 		wrapper.appendTo(obj);
 		parent = obj;
@@ -1478,7 +1480,7 @@ function HTML(params) {
 		url: '',
 		id: '',
 		class: '',
-		css: {}
+		css: {},
 	}, params);
 
 	var me = this;
@@ -1788,6 +1790,10 @@ function TextBox(params) {
 		input.prop('disabled', readonly);
 	}
 
+	this.getObject = function () {
+		return content;
+	}
+
 	return this;
 }
 
@@ -1838,18 +1844,27 @@ function FlexBox(params) {
 	var me = this;
 	var parent = null;
 	var id = makeid();
-	var items = settings.items;
 
 	me.content = $('<div />', {
 		id: id,
 		class: 'it-flex'
 	});
 	me.content.css(settings.css);
-	me.content.addClass('it-flex-dir dir-' + settings.direction);
-	me.content.addClass('it-flex-wrap wrap-' + settings.wrap);
-	me.content.addClass('it-flex-jc jc-' + settings.justifyContent);
-	me.content.addClass('it-flex-ai ai-' + settings.alignItems);
-	me.content.addClass('it-flex-ac ac-' + settings.alignContent);
+
+	if (settings.direction)
+		me.content.addClass('it-flex-dir dir-' + settings.direction);
+
+	if (settings.wrap)
+		me.content.addClass('it-flex-wrap wrap-' + settings.wrap);
+
+	if (settings.justifyContent)
+		me.content.addClass('it-flex-jc jc-' + settings.justifyContent);
+
+	if (settings.alignItems)
+		me.content.addClass('it-flex-ai ai-' + settings.alignItems);
+
+	if (settings.alignContent)
+		me.content.addClass('it-flex-ac ac-' + settings.alignContent);
 
 	if (settings.title) {
 		var title = $('<div/>', {
