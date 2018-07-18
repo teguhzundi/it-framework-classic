@@ -32,6 +32,7 @@ $form-control-height: 33px;
 		border: 1px solid #4ec1ff;
 	}
 
+	// Select
 	&-select {
 		position: relative;
 		display: block;
@@ -67,4 +68,41 @@ $form-control-height: 33px;
 			z-index: -1;
 		}
 	}
+
+	//CheckBox 
+	&-checkbox {
+		display: flex;
+
+		&.block {
+			flex-direction: column;
+
+			label {
+				margin-bottom: 15px;
+
+				&:last-child {
+					margin-bottom: 0;
+				}
+			}
+		}
+
+		input {
+			margin-right: 8px;
+		}		
+
+		small {
+			display: block;
+			margin-left: 24px;
+			color: #6c757d;
+			font-weight: normal;
+
+			&.append {
+				margin-top: 8px;
+			}
+
+			&.prepend {
+				margin-bottom: 8px;
+			}
+		}
+	} 
+
 }

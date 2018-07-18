@@ -883,8 +883,10 @@ function Button(params) {
 		iconCls: '',
 		btnCls: '',
 		css: {},
+		block: false,
 		disabled: false,
 		text: '',
+		textAlign: 'center',
 		id: makeid()
 	}, params);
 
@@ -897,7 +899,13 @@ function Button(params) {
 		html: settings.text
 	});
 
+	this.content.addClass("text-" + settings.textAlign);
+
 	if (!$.isEmptyObject(settings.css)) this.content.css(settings.css);
+
+	if (settings.block) {
+		this.content.addClass('it-btn-block');
+	}
 
 	if (settings.disabled) this.content.addClass('disabled');
 
@@ -955,7 +963,7 @@ function Dialog(params) {
 	var id = makeid();
 	var icon = settings.iconCls != '' ? '<span class="fa fa-' + settings.iconCls + '"></span>' : '';
 	var items = [];
-	var template = $("\n\t\t<div id=\"" + id + "\" class=\"it-dialog\">\n\t\t\t<div class=\"it-dialog-content\">\n\t\t\t\t<div class=\"it-title\">" + icon + " " + settings.title + "</div> \n\t\t\t\t<div class=\"it-dialog-inner\"></div>\n\t\t\t\t<div class=\"it-dialog-footer\"></div>\n\t\t\t</div>\n\t\t</div>\n\t");
+	var template = $("\n\t\t<div id=\"" + id + "\" class=\"it-dialog\">\n\t\t\t<div class=\"it-dialog-content\">\n\t\t\t\t" + (settings.title ? "<div class=\"it-title\">" + icon + " " + settings.title + "</div>" : '') + "\n\t\t\t\t<div class=\"it-dialog-inner\"></div>\n\t\t\t\t<div class=\"it-dialog-footer\"></div>\n\t\t\t</div>\n\t\t</div>\n\t");
 	template.find('.it-dialog-content').width(settings.width);
 	template.find('.it-dialog-content').css(settings.autoHeight ? 'min-height' : 'height', settings.height);
 
@@ -1182,14 +1190,14 @@ function MessageBox(params) {
 
 	var settings = $.extend({
 		type: 'info',
-		title: 'Judul',
+		title: '',
 		message: '',
 		width: 450,
 		height: 50,
 		buttons: []
 	}, params);
 
-	this.content = $("\n\t\t<div class=\"it-messagebox\">\n\t\t\t<div class=\"it-messagebox-content\">\n\t\t\t\t<div class=\"it-title\">" + settings.title + "</div>\n\t\t\t\t<div class=\"it-messagebox-inner\">\n\t\t\t\t\t<div class=\"message-icon " + settings.type + "\"></div>\n\t\t\t\t\t" + settings.message + "\n\t\t\t\t</div>\n\t\t\t\t<div class=\"clearfix\">\n\t\t\t\t\t<div class=\"float-right message-buttons\"></div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t");
+	this.content = $("\n\t\t<div class=\"it-messagebox\">\n\t\t\t<div class=\"it-messagebox-content\">\n\t\t\t\t" + (settings.title ? "<div class=\"it-title\">" + settings.title + "</div>" : "") + "\n\t\t\t\t<div class=\"it-messagebox-inner\">\n\t\t\t\t\t<div class=\"message-icon " + settings.type + "\"></div>\n\t\t\t\t\t" + settings.message + "\n\t\t\t\t</div>\n\t\t\t\t<div class=\"clearfix\">\n\t\t\t\t\t<div class=\"float-right message-buttons\"></div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t");
 
 	this.content.find('.it-messagebox-content').css({
 		'width': settings.width,
@@ -1420,98 +1428,61 @@ function ComboBox(params) {
 }
 
 function HTML(params) {
+	var _this11 = this;
+
 	var settings = $.extend({
 		content: '',
-		url: '',
-		id: '',
-		class: '',
-		css: {}
-	}, params);
-
-	var me = this;
-	var id = settings.id == '' ? makeid() : settings.id;
-	var parent = null;
-	var content = $('<div/>', {
-		id: id,
-		css: settings.css,
-		class: settings.class
-	});
-
-	if (!settings.url) {
-		if (typeof settings.content === 'string') {
-			content.html(settings.content);
-		} else {
-			var htmlKonten = _typeof(settings.content) === 'object' ? settings.content : $(settings.content);
-			htmlKonten.appendTo(content);
-		}
-	} else {
-		content.load(settings.url);
-	}
-
-	me.setContent = function (html) {
-		content.html(html);
-	};
-
-	me.renderTo = function (obj) {
-		content.appendTo(obj);
-		parent = obj;
-	};
-
-	me.getSetting = function () {
-		return settings;
-	};
-
-	me.getId = function () {
-		return id;
-	};
-
-	return me;
-}
-
-function Content(params) {
-	var settings = $.extend({
 		id: '',
 		class: '',
 		css: {},
 		items: []
 	}, params);
 
-	var id = settings.id ? makeid() : settings.id;
-	var content = $('<div/>', {
+	var id = !settings.id ? makeid() : settings.id;
+	this.content = $('<div/>', {
 		id: id,
 		css: settings.css,
 		class: settings.class
 	});
 
-	if (!settings.url) {
-		if (typeof settings.content === 'string') {
-			content.html(settings.content);
-		} else {
-			var htmlKonten = _typeof(settings.content) === 'object' ? settings.content : $(settings.content);
-			htmlKonten.appendTo(content);
-		}
+	if (typeof settings.content === 'string') {
+		this.content.html(settings.content);
 	} else {
-		content.load(settings.url);
+		var html = _typeof(settings.content) === 'object' ? settings.content : $(settings.content);
+		html.appendTo(this.content);
 	}
 
-	me.setContent = function (html) {
-		content.html(html);
+	if (settings.items.length) {
+		$.each(settings.items, function (k, val) {
+			var item = null;
+			if (typeof val.renderTo === 'function') {
+				val.renderTo(_this11.content);
+			} else if ((typeof val === "undefined" ? "undefined" : _typeof(val)) === 'object') {
+				item = createObject(val);
+				if (item) {
+					item.renderTo(_this11.content);
+				}
+			}
+		});
+	}
+
+	this.setContent = function (html) {
+		this.content.html(html);
 	};
 
-	me.renderTo = function (obj) {
-		content.appendTo(obj);
-		parent = obj;
+	this.renderTo = function (obj) {
+		this.content.appendTo(obj);
 	};
 
-	me.getSetting = function () {
+	this.getSetting = function () {
 		return settings;
 	};
 
-	me.getId = function () {
+	this.getId = function () {
 		return id;
 	};
 
-	return me;
+	return this;
 }
 
 function Form(params) {
@@ -1787,33 +1758,59 @@ function TextBox(params) {
 }
 
 function CheckBox(params) {
-	var settings = $.extend({
-		dataIndex: 'textfield',
-		text: '',
-		disabled: false,
-		newLine: false,
-		value: '1'
+	var _this12 = this;
+
+	this.settings = $.extend({
+		name: '',
+		items: [],
+		block: true,
+		disableAll: false,
+		defaultValue: '',
+		css: {}
 	}, params);
 
-	var me = this;
-	var parent = null;
-	disabled = settings.disabled > 0 ? ' disabled ' : '';
+	this.content = $('<div/>', {
+		class: "it-form-control-checkbox"
+	});
 
-	var konten = '<input type="checkbox" class="it-checkbox" name="' + settings.dataIndex + '" id="' + settings.dataIndex + '" value="' + settings.value + '" ' + maxlength + minlength + disabled + '><label class="it-label" for="' + settings.dataIndex + '">' + settings.text + '</label>' + (settings.newLine ? '<BR>' : '');
-	var content = $(konten);
+	if (this.settings.block) this.content.addClass('block');
 
-	me.renderTo = function (obj) {
-		content.appendTo(obj);
-		parent = obj;
+	if (!$.isEmptyObject(this.settings.css)) this.content.css(this.settings.css);
+
+	if (this.settings.items.length) {
+		$.each(this.settings.items, function (index, item) {
+			var val = $.extend(true, {
+				value: '',
+				text: 'Text',
+				disabled: false,
+				smallText: {
+					position: 'append',
+					text: ''
+				}
+			}, item);
+			var checked = _this12.settings.defaultValue && _this12.settings.defaultValue == val.value;
+			var template = $("\n\t\t\t\t<label> \n\t\t\t\t\t<input type=\"radio\" name=\"" + _this12.settings.name + "\" value=\"" + val.value + "\" " + (checked ? "checked" : "") + "/>\t\t\t\t\t\t\n\t\t\t\t\t" + val.text + "\n\t\t\t\t</label>\n\t\t\t");
+
+			if (val.smallText.text) {
+				template[val.smallText.position == "append" ? "append" : "prepend"]($('<small/>', {
+					html: val.smallText.text,
+					class: val.smallText.position
+				}));
+			}
+
+			if (_this12.settings.disableAll || _this12.settings.disabled) {
+				template.find('input').prop('disabled', true);
+			}
+
+			template.appendTo(_this12.content);
+		});
+	}
+
+	this.renderTo = function (obj) {
+		this.content.appendTo(obj);
 	};
 
-	me.getSetting = function () {
-		return settings;
-	};
-	me.getId = function () {
-		return settings.dataIndex;
-	};
-	return me;
+	return this;
 }
 
 function FlexBox(params) {

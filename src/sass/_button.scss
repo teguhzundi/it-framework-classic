@@ -18,10 +18,18 @@
 
     @include transition(all 0.3s cubic-bezier(0.165, 0.840, 0.440, 1.000));
 
+    .fa {
+        width: 16px;
+    }
+
+    &.it-btn-block {
+        display: block;
+    }
+
     &:focus {
         outline: none;
     }
-
+    
     &:hover {
         text-decoration: none;
         color: #333333;
