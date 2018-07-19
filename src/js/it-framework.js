@@ -390,8 +390,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-						src: url + value
-					})
+					src: url + value
+				})
 					.css({
 						height: col.width - 10,
 						display: 'block',
@@ -983,7 +983,7 @@ function Dialog(params) {
 	var template = $(`
 		<div id="${id}" class="it-dialog">
 			<div class="it-dialog-content">
-				${ settings.title ? `<div class="it-title">${icon} ${settings.title}</div>` : '' }
+				${ settings.title ? `<div class="it-title">${icon} ${settings.title}</div>` : ''}
 				<div class="it-dialog-inner"></div>
 				<div class="it-dialog-footer"></div>
 			</div>
@@ -1217,7 +1217,7 @@ function MessageBox(params) {
 	this.content = $(`
 		<div class="it-messagebox">
 			<div class="it-messagebox-content">
-				${ settings.title ? `<div class="it-title">${settings.title}</div>` : "" }
+				${ settings.title ? `<div class="it-title">${settings.title}</div>` : ""}
 				<div class="it-messagebox-inner">
 					<div class="message-icon ${settings.type}"></div>
 					${settings.message}
@@ -1290,11 +1290,12 @@ function MessageBox(params) {
 }
 
 function ComboBox(params) {
-	var settings = $.extend({
+	let settings = $.extend({
 		dataIndex: '',
 		value: '',
 		emptyText: '',
 		emptyValue: '',
+		raw: false,
 		autoLoad: true,
 		allowBlank: true,
 		disabled: false,
@@ -1307,10 +1308,7 @@ function ComboBox(params) {
 		},
 	}, params);
 
-	var id = settings.dataIndex ? settings.dataIndex : makeid();
-	var parent = null;
-
-	var template = $('<select/>', {
+	let template = $('<select/>', {
 		class: "it-form-control",
 		name: settings.dataIndex,
 		id: settings.dataIndex
@@ -1434,12 +1432,13 @@ function ComboBox(params) {
 	}
 
 	this.renderTo = function (obj) {
-		let wrapper = $('<div/>', {
-			class: "it-form-control-select"
-		});
-		template.appendTo(wrapper);
-		wrapper.appendTo(obj);
-		parent = obj;
+		if(!settings.raw) {
+			let wrapper = $('<div/>', { class: "it-form-control-select" });
+			template.appendTo(wrapper);
+			wrapper.appendTo(obj);
+		} else {
+			template.appendTo(obj);
+		}
 	}
 
 	if (settings.autoLoad) {
@@ -1813,7 +1812,7 @@ function CheckBox(params) {
 			let checked = this.settings.defaultValue && this.settings.defaultValue == val.value;
 			let template = $(`
 				<label> 
-					<input type="radio" name="${this.settings.name}" value="${val.value}" ${ checked ? "checked" : "" }/>						
+					<input type="radio" name="${this.settings.name}" value="${val.value}" ${checked ? "checked" : ""}/>						
 					${val.text}
 				</label>
 			`);

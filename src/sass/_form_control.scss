@@ -1,4 +1,4 @@
-$form-control-height: 33px;
+$form-control-height: 32px;
 
 .it-form-control {
 	border: 1px solid #ced4da;
@@ -41,6 +41,8 @@ $form-control-height: 33px;
 		z-index: 1;
 		color: #000;
 		border-radius: 3px;
+		height: $form-control-height;
+		line-height: $form-control-height;
 
 		select {
 			border: none;

@@ -1269,6 +1269,7 @@ function ComboBox(params) {
 		value: '',
 		emptyText: '',
 		emptyValue: '',
+		raw: false,
 		autoLoad: true,
 		allowBlank: true,
 		disabled: false,
@@ -1280,9 +1281,6 @@ function ComboBox(params) {
 			data: []
 		}
 	}, params);
-
-	var id = settings.dataIndex ? settings.dataIndex : makeid();
-	var parent = null;
 
 	var template = $('<select/>', {
 		class: "it-form-control",
@@ -1412,12 +1410,13 @@ function ComboBox(params) {
 	};
 
 	this.renderTo = function (obj) {
-		var wrapper = $('<div/>', {
-			class: "it-form-control-select"
-		});
-		template.appendTo(wrapper);
-		wrapper.appendTo(obj);
-		parent = obj;
+		if (!settings.raw) {
+			var wrapper = $('<div/>', { class: "it-form-control-select" });
+			template.appendTo(wrapper);
+			wrapper.appendTo(obj);
+		} else {
+			template.appendTo(obj);
+		}
 	};
 
 	if (settings.autoLoad) {
