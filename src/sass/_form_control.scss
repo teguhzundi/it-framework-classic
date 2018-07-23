@@ -78,9 +78,21 @@ $form-control-height: 32px;
 		&.block {
 			flex-direction: column;
 
+			&.compact {
+				label {
+					margin-bottom: 4px;
+				}
+			}
+
+			&.cozy {
+				label {
+					margin-bottom: 0;
+				}
+			}
+
 			label {
 				margin-bottom: 15px;
-
+				
 				&:last-child {
 					margin-bottom: 0;
 				}

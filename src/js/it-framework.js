@@ -31,8 +31,8 @@ function createObject(settings) {
 		case "textbox":
 			res = new TextBox(settings);
 			break;
-		case "checkbox":
-			res = new CheckBox(settings);
+		case "chooser":
+			res = new Chooser(settings);
 			break;
 		case "imagebox":
 			res = new ImageBox(settings);
@@ -1290,7 +1290,7 @@ function MessageBox(params) {
 }
 
 function ComboBox(params) {
-	let settings = $.extend({
+	let settings = $.extend(true, {
 		dataIndex: '',
 		value: '',
 		emptyText: '',
@@ -1305,7 +1305,7 @@ function ComboBox(params) {
 			type: 'array',
 			url: '',
 			data: [],
-		},
+		}
 	}, params);
 
 	let template = $('<select/>', {
@@ -1314,7 +1314,7 @@ function ComboBox(params) {
 		id: settings.dataIndex
 	});
 
-	if (settings.width)
+	if (settings.width && settings.raw)
 		template.width(settings.width);
 
 	if (settings.readOnly)
@@ -1432,8 +1432,11 @@ function ComboBox(params) {
 	}
 
 	this.renderTo = function (obj) {
-		if(!settings.raw) {
-			let wrapper = $('<div/>', { class: "it-form-control-select" });
+		if (!settings.raw) {
+			let wrapper = $('<div/>', {
+				class: 'it-form-control-select',
+				width: settings.width
+			});
 			template.appendTo(wrapper);
 			wrapper.appendTo(obj);
 		} else {
@@ -1778,18 +1781,26 @@ function TextBox(params) {
 	return this;
 }
 
-function CheckBox(params) {
-	this.settings = $.extend({
+function Chooser(params) {
+	this.settings = $.extend(true, {
 		name: '',
-		items: [],
+		type: 'radio',
+		mode: 'comfort', // Comfort, Compact, Cozy
+		dataSource: {
+			type: 'array',
+			url: '',
+			data: [],
+		},
 		block: true,
 		disableAll: false,
 		defaultValue: '',
 		css: {},
 	}, params);
 
+	this.settings.mode = $.inArray(this.settings.mode, ['comfort', 'compact', 'cozy']) >= -1 ? this.settings.mode : 'comfort';
+	this.settings.type = $.inArray(this.settings.type, ['radio', 'checkbox']) >= -1 ? this.settings.type : 'radio';
 	this.content = $('<div/>', {
-		class: "it-form-control-checkbox"
+		class: 'it-form-control-checkbox ' + this.settings.mode
 	});
 
 	if (this.settings.block)
@@ -1797,7 +1808,7 @@ function CheckBox(params) {
 
 	if (!$.isEmptyObject(this.settings.css))
 		this.content.css(this.settings.css);
-
+	
 	if (this.settings.items.length) {
 		$.each(this.settings.items, (index, item) => {
 			let val = $.extend(true, {
@@ -1809,13 +1820,13 @@ function CheckBox(params) {
 					text: ''
 				}
 			}, item);
-			let checked = this.settings.defaultValue && this.settings.defaultValue == val.value;
+
 			let template = $(`
 				<label> 
-					<input type="radio" name="${this.settings.name}" value="${val.value}" ${checked ? "checked" : ""}/>						
+					<input type="${this.settings.type}" name="${this.settings.name}" value="${val.value}"/>						
 					${val.text}
-				</label>
-			`);
+				</label>`
+			);
 
 			if (val.smallText.text) {
 				template[val.smallText.position == "append" ? "append" : "prepend"]($('<small/>', {
@@ -1832,8 +1843,72 @@ function CheckBox(params) {
 		});
 	}
 
+	this.getDataSource = function () {
+		template.empty();
+
+		if (settings.emptyText) {
+			template.append($('<option/>', {
+				val: settings.emptyValue,
+				text: settings.emptyText
+			}));
+		}
+
+		switch (settings.dataSource.type) {
+			case 'array':
+				var data = typeof settings.dataSource.data !== "undefined" ? settings.dataSource.data : null;
+				if (data) {
+					$.each(data, (k, val) => {
+						var extraData = typeof val.data !== "undefined" ? val.data : null;
+						template.append($('<option/>', {
+							val: val.key,
+							html: val.value,
+							selected: (val.key == settings.value),
+							data: extraData
+						}));
+					});
+				}
+				this.events.fire("onLoad", [template, data]);
+				break;
+
+			case 'ajax':
+				$.ajax({
+					url: settings.dataSource.url,
+					type: settings.dataSource.method || "get",
+					data: settings.dataSource.params || {},
+					dataType: 'json',
+					success: (data) => {
+						var rows = typeof data.rows !== "undefined" ? data.rows : null;
+						if (rows && rows.length) {
+							$.each(rows, (k, val) => {
+								var extraData = typeof val.data !== "undefined" ? val.data : null;
+								template.append($('<option/>', {
+									val: val.key,
+									html: val.value,
+									selected: (val.key == settings.value),
+									data: extraData
+								}));
+							});
+						}
+						this.events.fire("onLoad", [template, rows]);
+					}
+				});
+				break;
+
+			default:
+				throw "type only available for ajax and array";
+				break;
+		}
+	}
+
 	this.renderTo = function (obj) {
 		this.content.appendTo(obj);
+		if (Array.isArray(this.settings.defaultValue) && this.settings.type == "checkbox") {
+			$.each(this.settings.defaultValue, (index, value) => {
+				this.content.find(`input[value="${value}"]`).prop('checked', true);
+			});
+		} else {
+			this.content.find(`input[value="${this.settings.defaultValue}"]`).prop('checked', true);
+		}
 	}
 
 	return this;

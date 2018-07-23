@@ -35,8 +35,8 @@ function createObject(settings) {
 		case "textbox":
 			res = new TextBox(settings);
 			break;
-		case "checkbox":
-			res = new CheckBox(settings);
+		case "chooser":
+			res = new Chooser(settings);
 			break;
 		case "imagebox":
 			res = new ImageBox(settings);
@@ -1264,7 +1264,7 @@ function MessageBox(params) {
 function ComboBox(params) {
 	var _this9 = this;
 
-	var settings = $.extend({
+	var settings = $.extend(true, {
 		dataIndex: '',
 		value: '',
 		emptyText: '',
@@ -1288,7 +1288,7 @@ function ComboBox(params) {
 		id: settings.dataIndex
 	});
 
-	if (settings.width) template.width(settings.width);
+	if (settings.width && settings.raw) template.width(settings.width);
 
 	if (settings.readOnly) template.prop('readonly', settings.readOnly);
 
@@ -1411,7 +1411,10 @@ function ComboBox(params) {
 
 	this.renderTo = function (obj) {
 		if (!settings.raw) {
-			var wrapper = $('<div/>', { class: "it-form-control-select" });
+			var wrapper = $('<div/>', {
+				class: 'it-form-control-select',
+				width: settings.width
+			});
 			template.appendTo(wrapper);
 			wrapper.appendTo(obj);
 		} else {
@@ -1756,20 +1759,28 @@ function TextBox(params) {
 	return this;
 }
 
-function CheckBox(params) {
+function Chooser(params) {
 	var _this12 = this;
 
-	this.settings = $.extend({
+	this.settings = $.extend(true, {
 		name: '',
-		items: [],
+		type: 'radio',
+		mode: 'comfort', // Comfort, Compact, Cozy
+		dataSource: {
+			type: 'array',
+			url: '',
+			data: []
+		},
 		block: true,
 		disableAll: false,
 		defaultValue: '',
 		css: {}
 	}, params);
 
+	this.settings.mode = $.inArray(this.settings.mode, ['comfort', 'compact', 'cozy']) >= -1 ? this.settings.mode : 'comfort';
+	this.settings.type = $.inArray(this.settings.type, ['radio', 'checkbox']) >= -1 ? this.settings.type : 'radio';
 	this.content = $('<div/>', {
-		class: "it-form-control-checkbox"
+		class: 'it-form-control-checkbox ' + this.settings.mode
 	});
 
 	if (this.settings.block) this.content.addClass('block');
@@ -1787,8 +1798,8 @@ function CheckBox(params) {
 					text: ''
 				}
 			}, item);
-			var checked = _this12.settings.defaultValue && _this12.settings.defaultValue == val.value;
-			var template = $("\n\t\t\t\t<label> \n\t\t\t\t\t<input type=\"radio\" name=\"" + _this12.settings.name + "\" value=\"" + val.value + "\" " + (checked ? "checked" : "") + "/>\t\t\t\t\t\t\n\t\t\t\t\t" + val.text + "\n\t\t\t\t</label>\n\t\t\t");
+
+			var template = $("\n\t\t\t\t<label> \n\t\t\t\t\t<input type=\"" + _this12.settings.type + "\" name=\"" + _this12.settings.name + "\" value=\"" + val.value + "\"/>\t\t\t\t\t\t\n\t\t\t\t\t" + val.text + "\n\t\t\t\t</label>");
 
 			if (val.smallText.text) {
 				template[val.smallText.position == "append" ? "append" : "prepend"]($('<small/>', {
@@ -1805,8 +1816,76 @@ function CheckBox(params) {
 		});
 	}
 
+	this.getDataSource = function () {
+		var _this13 = this;
+
+		template.empty();
+
+		if (settings.emptyText) {
+			template.append($('<option/>', {
+				val: settings.emptyValue,
+				text: settings.emptyText
+			}));
+		}
+
+		switch (settings.dataSource.type) {
+			case 'array':
+				var data = typeof settings.dataSource.data !== "undefined" ? settings.dataSource.data : null;
+				if (data) {
+					$.each(data, function (k, val) {
+						var extraData = typeof val.data !== "undefined" ? val.data : null;
+						template.append($('<option/>', {
+							val: val.key,
+							html: val.value,
+							selected: val.key == settings.value,
+							data: extraData
+						}));
+					});
+				}
+				this.events.fire("onLoad", [template, data]);
+				break;
+
+			case 'ajax':
+				$.ajax({
+					url: settings.dataSource.url,
+					type: settings.dataSource.method || "get",
+					data: settings.dataSource.params || {},
+					dataType: 'json',
+					success: function success(data) {
+						var rows = typeof data.rows !== "undefined" ? data.rows : null;
+						if (rows && rows.length) {
+							$.each(rows, function (k, val) {
+								var extraData = typeof val.data !== "undefined" ? val.data : null;
+								template.append($('<option/>', {
+									val: val.key,
+									html: val.value,
+									selected: val.key == settings.value,
+									data: extraData
+								}));
+							});
+						}
+						_this13.events.fire("onLoad", [template, rows]);
+					}
+				});
+				break;
+
+			default:
+				throw "type only available for ajax and array";
+				break;
+		}
+	};
+
 	this.renderTo = function (obj) {
+		var _this14 = this;
+
 		this.content.appendTo(obj);
+		if (Array.isArray(this.settings.defaultValue) && this.settings.type == "checkbox") {
+			$.each(this.settings.defaultValue, function (index, value) {
+				_this14.content.find("input[value=\"" + value + "\"]").prop('checked', true);
+			});
+		} else {
+			this.content.find("input[value=\"" + this.settings.defaultValue + "\"]").prop('checked', true);
+		}
 	};
 
 	return this;
