@@ -390,8 +390,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-						src: url + value
-					})
+					src: url + value
+				})
 					.css({
 						height: col.width - 10,
 						display: 'block',
@@ -1332,8 +1332,6 @@ function ComboBox(params) {
 	});
 
 	this.events = new Event(this, settings);
-	this.events.add("hide", () => template.hide());
-	this.events.add("show", () => template.show());
 	this.events.set(template);
 
 	this.onLoad = (act) => this.events.add("onLoad", act);
@@ -1371,39 +1369,35 @@ function ComboBox(params) {
 			case 'array':
 				var data = typeof settings.dataSource.data !== "undefined" ? settings.dataSource.data : null;
 				if (data) {
-					$.each(data, (k, val) => {
-						var extraData = typeof val.data !== "undefined" ? val.data : null;
+					$.each(data, (index, item) => {
 						template.append($('<option/>', {
-							val: val.key,
-							html: val.value,
-							selected: (val.key == settings.value),
-							data: extraData
+							val: item.key,
+							html: item.value,
+							selected: (item.key == settings.value),
+							data: item
 						}));
 					});
 				}
 				this.events.fire("onLoad", [template, data]);
 				break;
-
 			case 'ajax':
 				$.ajax({
 					url: settings.dataSource.url,
 					type: settings.dataSource.method || "get",
 					data: settings.dataSource.params || {},
 					dataType: 'json',
-					success: (data) => {
-						var rows = typeof data.rows !== "undefined" ? data.rows : null;
-						if (rows && rows.length) {
-							$.each(rows, (k, val) => {
-								var extraData = typeof val.data !== "undefined" ? val.data : null;
+					success: (res) => {
+						if (typeof res.rows !== "undefined" && res.rows.length) {
+							$.each(res.rows, (index, item) => {
 								template.append($('<option/>', {
-									val: val.key,
-									html: val.value,
-									selected: (val.key == settings.value),
-									data: extraData
+									val: item.key,
+									html: item.value,
+									selected: (item.key == settings.value),
+									data: item
 								}));
 							});
 						}
-						this.events.fire("onLoad", [template, rows]);
+						this.events.fire("onLoad", [template, res.rows]);
 					}
 				});
 				break;

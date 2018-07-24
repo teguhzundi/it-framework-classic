@@ -1302,12 +1302,6 @@ function ComboBox(params) {
 	});
 
 	this.events = new Event(this, settings);
-	this.events.add("hide", function () {
-		return template.hide();
-	});
-	this.events.add("show", function () {
-		return template.show();
-	});
 	this.events.set(template);
 
 	this.onLoad = function (act) {
@@ -1349,39 +1343,35 @@ function ComboBox(params) {
 			case 'array':
 				var data = typeof settings.dataSource.data !== "undefined" ? settings.dataSource.data : null;
 				if (data) {
-					$.each(data, function (k, val) {
-						var extraData = typeof val.data !== "undefined" ? val.data : null;
+					$.each(data, function (index, item) {
 						template.append($('<option/>', {
-							val: val.key,
-							html: val.value,
-							selected: val.key == settings.value,
-							data: extraData
+							val: item.key,
+							html: item.value,
+							selected: item.key == settings.value,
+							data: item
 						}));
 					});
 				}
 				this.events.fire("onLoad", [template, data]);
 				break;
-
 			case 'ajax':
 				$.ajax({
 					url: settings.dataSource.url,
 					type: settings.dataSource.method || "get",
 					data: settings.dataSource.params || {},
 					dataType: 'json',
-					success: function success(data) {
-						var rows = typeof data.rows !== "undefined" ? data.rows : null;
-						if (rows && rows.length) {
-							$.each(rows, function (k, val) {
-								var extraData = typeof val.data !== "undefined" ? val.data : null;
+					success: function success(res) {
+						if (typeof res.rows !== "undefined" && res.rows.length) {
+							$.each(res.rows, function (index, item) {
 								template.append($('<option/>', {
-									val: val.key,
-									html: val.value,
-									selected: val.key == settings.value,
-									data: extraData
+									val: item.key,
+									html: item.value,
+									selected: item.key == settings.value,
+									data: item
 								}));
 							});
 						}
-						_this10.events.fire("onLoad", [template, rows]);
+						_this10.events.fire("onLoad", [template, res.rows]);
 					}
 				});
 				break;
