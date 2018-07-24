@@ -390,8 +390,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-					src: url + value
-				})
+						src: url + value
+					})
 					.css({
 						height: col.width - 10,
 						display: 'block',
@@ -1784,13 +1784,14 @@ function TextBox(params) {
 function Chooser(params) {
 	this.settings = $.extend(true, {
 		name: '',
-		type: 'radio',
+		type: 'radio', // Radio, Checkbox
 		mode: 'comfort', // Comfort, Compact, Cozy
 		dataSource: {
 			type: 'array',
 			url: '',
 			data: [],
 		},
+		autoLoad: true,
 		block: true,
 		disableAll: false,
 		defaultValue: '',
@@ -1799,97 +1800,54 @@ function Chooser(params) {
 
 	this.settings.mode = $.inArray(this.settings.mode, ['comfort', 'compact', 'cozy']) >= -1 ? this.settings.mode : 'comfort';
 	this.settings.type = $.inArray(this.settings.type, ['radio', 'checkbox']) >= -1 ? this.settings.type : 'radio';
+
 	this.content = $('<div/>', {
 		class: 'it-form-control-checkbox ' + this.settings.mode
 	});
+
+	this.events = new Event(this, this.settings);
+	this.events.set(this.content);
 
 	if (this.settings.block)
 		this.content.addClass('block');
 
 	if (!$.isEmptyObject(this.settings.css))
 		this.content.css(this.settings.css);
-	
-	if (this.settings.items.length) {
-		$.each(this.settings.items, (index, item) => {
-			let val = $.extend(true, {
-				value: '',
-				text: 'Text',
-				disabled: false,
-				smallText: {
-					position: 'append',
-					text: ''
-				}
-			}, item);
-
-			let template = $(`
-				<label> 
-					<input type="${this.settings.type}" name="${this.settings.name}" value="${val.value}"/>						
-					${val.text}
-				</label>`
-			);
-
-			if (val.smallText.text) {
-				template[val.smallText.position == "append" ? "append" : "prepend"]($('<small/>', {
-					html: val.smallText.text,
-					class: val.smallText.position
-				}));
-			}
-
-			if (this.settings.disableAll || this.settings.disabled) {
-				template.find('input').prop('disabled', true);
-			}
-
-			template.appendTo(this.content);
-		});
-	}
 
 	this.getDataSource = function () {
-		template.empty();
+		this.content.empty();
 
-		if (settings.emptyText) {
-			template.append($('<option/>', {
-				val: settings.emptyValue,
-				text: settings.emptyText
-			}));
-		}
-
-		switch (settings.dataSource.type) {
+		switch (this.settings.dataSource.type) {
 			case 'array':
-				var data = typeof settings.dataSource.data !== "undefined" ? settings.dataSource.data : null;
+				var data = typeof this.settings.dataSource.data !== "undefined" ? this.settings.dataSource.data : null;
 				if (data) {
-					$.each(data, (k, val) => {
-						var extraData = typeof val.data !== "undefined" ? val.data : null;
-						template.append($('<option/>', {
-							val: val.key,
-							html: val.value,
-							selected: (val.key == settings.value),
-							data: extraData
-						}));
+					$.each(data, (index, item) => {
+						this.createItem(item);
 					});
 				}
-				this.events.fire("onLoad", [template, data]);
+				this.events.fire("onLoad", [this.content, data]);
 				break;
 
 			case 'ajax':
+				let ajax = $.extend(true, {
+					method: 'get',
+					url: '',
+					params: {},
+				}, this.settings.dataSource);
+
 				$.ajax({
-					url: settings.dataSource.url,
-					type: settings.dataSource.method || "get",
-					data: settings.dataSource.params || {},
+					url: ajax.url,
+					type: ajax.method,
+					data: ajax.params,
 					dataType: 'json',
 					success: (data) => {
 						var rows = typeof data.rows !== "undefined" ? data.rows : null;
 						if (rows && rows.length) {
-							$.each(rows, (k, val) => {
-								var extraData = typeof val.data !== "undefined" ? val.data : null;
-								template.append($('<option/>', {
-									val: val.key,
-									html: val.value,
-									selected: (val.key == settings.value),
-									data: extraData
-								}));
+							$.each(rows, (index, item) => {
+								this.createItem(item);
 							});
 						}
-						this.events.fire("onLoad", [template, rows]);
+						this.events.fire("onLoad", [this.content, rows]);
 					}
 				});
 				break;
@@ -1898,6 +1856,42 @@ function Chooser(params) {
 				throw "type only available for ajax and array";
 				break;
 		}
+	}
+
+	this.setDataSource = function (data) {
+		settings.dataSource = data;
+		me.getDataSource();
+	}
+
+	this.createItem = function (itemData = {}) {
+		let val = $.extend(true, {
+			value: '',
+			text: 'Text',
+			disabled: false,
+			smallText: {
+				position: 'append',
+				text: ''
+			}
+		}, itemData);
+
+		let template = $(`
+			<label> 
+				<input type="${this.settings.type}" name="${this.settings.name}" value="${val.key}"/>						
+				${val.value}
+			</label>`);
+
+		if (val.smallText.text) {
+			template[val.smallText.position == "append" ? "append" : "prepend"]($('<small/>', {
+				html: val.smallText.text,
+				class: val.smallText.position
+			}));
+		}
+
+		if (this.settings.disableAll || this.settings.disabled) {
+			template.find('input').prop('disabled', true);
+		}
+
+		template.appendTo(this.content);
 	}
 
 	this.renderTo = function (obj) {
@@ -1910,6 +1904,9 @@ function Chooser(params) {
 			this.content.find(`input[value="${this.settings.defaultValue}"]`).prop('checked', true);
 		}
 	}
+
+	if (this.settings.autoLoad)
+		this.getDataSource();
 
 	return this;
 }
