@@ -1845,6 +1845,7 @@ function Chooser(params) {
 		}, itemData);
 
 		var template = $("\n\t\t\t<label> \n\t\t\t\t<input type=\"" + this.settings.type + "\" name=\"" + this.settings.name + "\" value=\"" + val.key + "\"/>\t\t\t\t\t\t\n\t\t\t\t" + val.value + "\n\t\t\t</label>");
+		template.find('input').data(itemData);
 
 		if (val.smallText.text) {
 			template[val.smallText.position == "append" ? "append" : "prepend"]($('<small/>', {

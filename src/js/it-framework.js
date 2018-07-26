@@ -1873,6 +1873,7 @@ function Chooser(params) {
 				<input type="${this.settings.type}" name="${this.settings.name}" value="${val.key}"/>						
 				${val.value}
 			</label>`);
+		template.find('input').data(itemData);
 
 		if (val.smallText.text) {
 			template[val.smallText.position == "append" ? "append" : "prepend"]($('<small/>', {
