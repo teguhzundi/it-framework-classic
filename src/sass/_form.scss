@@ -16,11 +16,18 @@
 
             .form-label {
                 margin-bottom: 10px;
+                align-self: flex-start;
             }
         }
 
         .form-label {
             font-weight: 500;
+            margin-bottom: 0;
+            align-self: center;
+        }
+
+        .it-form-control {
+            flex: 1;
         }
     }
 }

@@ -1534,7 +1534,7 @@ function Form(params) {
 				var label = $('<label/>', {
 					class: 'form-label',
 					html: component.fieldLabel,
-					width: settings.fieldDefaults.fieldBlock ? 'auto' : settings.fieldDefaults.fieldLabel
+					css: { width: settings.fieldDefaults.fieldBlock ? 'auto' : settings.fieldDefaults.labelWidth }
 				});
 				label.appendTo(formGroup);
 			}
