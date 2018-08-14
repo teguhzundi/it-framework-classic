@@ -1647,10 +1647,12 @@ function Form(params) {
 
 function TextBox(params) {
 	var settings = $.extend({
-		dataIndex: 'textfield',
+		dataIndex: '',
 		type: 'text',
 		maxlength: null,
 		minlength: null,
+		min: 0,
+		max: 100,
 		format: '',
 		disabled: false,
 		readOnly: false,
@@ -1660,10 +1662,9 @@ function TextBox(params) {
 		css: {}
 	}, params);
 
-	var parent = null;
 	this.events = new Event(this, settings);
 
-	var inputAllowed = ['text', 'password', 'date', 'email', 'hidden'];
+	var inputAllowed = ['text', 'password', 'date', 'email', 'hidden', 'range'];
 	var input = null;
 	if (settings.type == 'textarea') {
 		input = $('<textarea/>');
@@ -1675,6 +1676,12 @@ function TextBox(params) {
 		if (settings.maxlength) input.attr('maxlength', settings.maxlength);
 
 		switch (settings.type) {
+			case 'range':
+				input.attr({
+					min: settings.min,
+					max: settings.max
+				});
+			break;
 			case 'numeric':
 				input.keypress(function (e) {
 					if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
