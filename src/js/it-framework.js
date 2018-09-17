@@ -1680,12 +1680,14 @@ function TextBox(params) {
 		if (settings.maxlength) input.attr('maxlength', settings.maxlength);
 
 		switch (settings.type) {
+			/*
 			case 'range':
 				input.attr({
 					min: settings.min,
 					max: settings.max
 				});
 			break;
+			*/
 			case 'numeric':
 				input.keypress(function (e) {
 					if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
@@ -1715,6 +1717,13 @@ function TextBox(params) {
 					console.info('Use native date, please install air-datepicker https://github.com/t1m0n/air-datepicker');
 				}
 				break;
+			case 'range' :
+				if(typeof $.fn.rangeslider !== 'undefined') {
+					input.rangeslider();
+				} else {
+					console.info('Use native date, please install air-datepicker https://github.com/IonDen/ion.rangeSlider');
+				}
+			break;
 		}
 	}
 
