@@ -1615,7 +1615,11 @@ function Form(params) {
 	};
 
 	this.getId = function () {
-		return id;
+		return settings.id;
+	};
+
+	this.getDOM = function () {
+		return content;
 	};
 
 	return this;
