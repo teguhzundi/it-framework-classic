@@ -1640,7 +1640,7 @@ function TextBox(params) {
 
 	this.events = new Event(this, settings);
 
-	var inputAllowed = ['text', 'password', 'date', 'email', 'hidden', 'range'];
+	var inputAllowed = ['text', 'password', 'date', 'email', 'hidden', 'range', 'file'];
 	var input = null;
 	if (settings.type == 'textarea') {
 		input = $('<textarea/>');
