@@ -1534,7 +1534,9 @@ function Form(params) {
 				var label = $('<label/>', {
 					class: 'form-label',
 					html: component.fieldLabel,
-					css: { width: settings.fieldDefaults.fieldBlock ? 'auto' : settings.fieldDefaults.labelWidth }
+					css: {
+						width: settings.fieldDefaults.fieldBlock ? 'auto' : settings.fieldDefaults.labelWidth
+					}
 				});
 				label.appendTo(formGroup);
 			}
@@ -1656,14 +1658,12 @@ function TextBox(params) {
 		if (settings.maxlength) input.attr('maxlength', settings.maxlength);
 
 		switch (settings.type) {
-			/*
-   case 'range':
-   	input.attr({
-   		min: settings.min,
-   		max: settings.max
-   	});
-   break;
-   */
+			case 'range':
+				input.attr({
+					min: settings.min,
+					max: settings.max
+				});
+				break;
 			case 'numeric':
 				input.keypress(function (e) {
 					if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
@@ -1693,13 +1693,7 @@ function TextBox(params) {
 					console.info('Use native date, please install air-datepicker https://github.com/t1m0n/air-datepicker');
 				}
 				break;
-			case 'range':
-				if (typeof $.fn.rangeslider !== 'undefined') {
-					input.rangeslider();
-				} else {
-					console.info('Use native date, please install air-datepicker https://github.com/IonDen/ion.rangeSlider');
-				}
-				break;
+
 		}
 	}
 
@@ -1762,8 +1756,12 @@ function TextBox(params) {
 		input.prop('disabled', readonly);
 	};
 
-	this.getObject = function () {
+	this.getDOM = function () {
 		return content;
+	};
+
+	this.getObject = function () {
+		console.info('getObject() Deprecated use getDOM()');
 	};
 
 	return this;
