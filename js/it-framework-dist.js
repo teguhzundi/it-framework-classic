@@ -743,88 +743,69 @@ function Store(options) {
 }
 
 function Menu(params) {
-	var settings = $.extend({
+	var _this6 = this;
+
+	this.settings = $.extend({
+		direction: 'center',
 		text: '',
-		direction: 'tengah',
 		iconCls: '',
-		disabled: false,
-		items: []
+		dropdown: true,
+		handler: null,
+		items: [],
+		id: makeid()
 	}, params);
 
-	var me = this;
-	var parent = null;
-	var id = makeid();
-	var items = settings.items;
+	this.content = $('<div/>', {
+		class: 'it-btn-group'
+	});
 
-	var clsDisabled = settings.disabled ? "disabled" : "";
-	var icon = settings.iconCls != '' ? '<span class="fa fa-' + settings.iconCls + '"></span>' : '';
-	var konten = '<a href="#@" id="' + id + '" class="it-btn ' + clsDisabled + '">' + icon + ' ' + settings.text + '</a><span class="tooDir" style="display:none"></span><ul data-arah="' + settings.direction + '"></ul>';
-	var content = $(konten);
-	for (var i = 0; i < items.length; i++) {
-		if (items[i] === null) continue;
-		var li = '<li></li>';
-		li = $(li);
-
-		if (typeof items[i].renderTo == 'function') {
-			items[i].renderTo(li);
-		} else if (_typeof(items[i]) == 'object') {
-			item = createObject(items[i]);
-			item.renderTo(li);
+	new Button({
+		id: this.settings.id,
+		text: this.settings.text,
+		iconCls: this.settings.iconCls,
+		handler: function handler(a, b, c) {
+			if (_this6.settings.dropdown) {
+				a.next('ul').toggle();
+			} else {
+				if (_this6.settings.handler) {
+					_this6.settings.handler();
+				}
+			}
 		}
-		content.eq(2).append(li);
+	}).renderTo(this.content);
+
+	if (this.settings.items.length) {
+		var ul = $('<ul/>', {
+			class: 'it-btn-dropdown'
+		});
+		$.each(this.settings.items, function (index, item) {
+			var li = $('<li/>');
+			li.appendTo(ul);
+
+			if (typeof item.renderTo === 'function') {
+				item.renderTo(li);
+			} else if ((typeof item === "undefined" ? "undefined" : _typeof(item)) === 'object') {
+				item = createObject(item);
+				if (item) {
+					item.renderTo(li);
+				}
+			}
+		});
+		ul.appendTo(this.content);
 	}
 
-	me.renderTo = function (obj) {
-		content.appendTo(obj);
-		parent = obj;
+	this.getId = function () {
+		return this.settings.id;
+	};
 
-		parent.click(function (e) {
-			var $this = $(this);
-			var me_child = $this.children('ul');
-			var me_data = typeof me_child.data('arah') != 'undefined' ? me_child.data('arah') : 'tengah';
-			var me_dir = $this.children('.tooDir');
-
-			if (!me_child.is(':visible')) {
-				$('.it-toolbar div ul').hide();
-				$('.it-toolbar div a').removeClass('active');
-				$('.it-toolbar div .tooDir').hide();
-			}
-
-			if (me_child.length > 0) {
-				me_a = me_child.parent().children('a').outerWidth();
-				me_b = me_child.outerWidth();
-				me_c = me_dir.outerWidth();
-
-				if (me_data == 'tengah') {
-					me_child.css('left', (me_a - me_b) / 2);
-				} else if (me_data == "kanan") {
-					me_child.css({
-						'left': 'auto',
-						'right': '5px'
-					});
-				}
-
-				me_dir.css('left', (me_a - me_c) / 2);
-				me_child.toggle();
-				me_dir.toggle();
-				$(this).children('a').toggleClass('active');
-			}
-			e.stopPropagation();
-		});
-
+	this.renderTo = function (obj) {
+		this.content.appendTo(obj);
 		$(document).click(function () {
-			$('.it-toolbar div ul').hide();
-			$('.it-toolbar div a').removeClass('active');
-			$('.it-toolbar div .tooDir').hide();
+			return $('.it-btn-dropdown').hide();
 		});
 	};
-	me.getSetting = function () {
-		return settings;
-	};
-	me.getId = function () {
-		return id;
-	};
-	return me;
+
+	return this;
 }
 
 function ToolBar(params) {
@@ -877,7 +858,7 @@ function ToolBar(params) {
 }
 
 function Button(params) {
-	var _this6 = this;
+	var _this7 = this;
 
 	var settings = $.extend({
 		iconCls: '',
@@ -921,10 +902,11 @@ function Button(params) {
 
 	if (typeof settings.handler !== 'undefined' && !settings.disabled) {
 		this.content.on('handler', function (e, a, b) {
-			settings.handler.call(null, a, b);
+			return settings.handler.call(e, a, b);
 		});
-		this.content.click(function () {
-			_this6.content.triggerHandler('handler', [_this6.content, _this6.extraData]);
+		this.content.click(function (e) {
+			_this7.content.triggerHandler('handler', [_this7.content, _this7.extraData]);
+			e.stopPropagation();
 		});
 	}
 
@@ -947,7 +929,7 @@ function Button(params) {
 }
 
 function Dialog(params) {
-	var _this7 = this;
+	var _this8 = this;
 
 	var settings = $.extend({
 		width: 300,
@@ -969,13 +951,13 @@ function Dialog(params) {
 
 	this.events = new Event(this, settings);
 	this.afterShow = function (act) {
-		return _this7.events.add("afterShow", act);
+		return _this8.events.add("afterShow", act);
 	};
 	this.onClose = function (act) {
-		return _this7.events.add("onClose", act);
+		return _this8.events.add("onClose", act);
 	};
 	this.onHide = function (act) {
-		return _this7.events.add("onHide", act);
+		return _this8.events.add("onHide", act);
 	};
 
 	$.each(settings.items, function (k, val) {
@@ -1186,7 +1168,7 @@ function Tabs(params) {
 }
 
 function MessageBox(params) {
-	var _this8 = this;
+	var _this9 = this;
 
 	var settings = $.extend({
 		type: 'info',
@@ -1218,11 +1200,11 @@ function MessageBox(params) {
 					} else if (typeof handler == 'string') {
 						window[handler]();
 					}
-					_this8.hide();
+					_this9.hide();
 				}
 			});
 			btn.addClass(btnClasses);
-			btn.appendTo(_this8.content.find('.message-buttons'));
+			btn.appendTo(_this9.content.find('.message-buttons'));
 		});
 	} else {
 		var btn = $('<a/>', {
@@ -1230,7 +1212,7 @@ function MessageBox(params) {
 			class: "it-btn",
 			html: "OK",
 			click: function click() {
-				_this8.hide();
+				_this9.hide();
 			}
 		});
 		btn.appendTo(this.content.find('.message-buttons'));
@@ -1255,14 +1237,14 @@ function MessageBox(params) {
 	this.content.appendTo('body');
 
 	setTimeout(function () {
-		return _this8.show();
+		return _this9.show();
 	}, 100);
 
 	return this;
 }
 
 function ComboBox(params) {
-	var _this9 = this;
+	var _this10 = this;
 
 	var settings = $.extend(true, {
 		dataIndex: '',
@@ -1303,10 +1285,12 @@ function ComboBox(params) {
 
 	this.events = new Event(this, settings);
 	this.events.set(template);
+	this.dataLoaded = null;
 
 	this.onLoad = function (act) {
-		return _this9.events.add("onLoad", act);
+		return _this10.events.add("onLoad", act);
 	};
+
 	this.getId = function () {
 		return settings.dataIndex;
 	};
@@ -1319,16 +1303,8 @@ function ComboBox(params) {
 		return template.find('option:selected');
 	};
 
-	this.val = function (v) {
-		if (typeof v !== "undefined") {
-			template.find('option').filter('[value="' + v + '"]').prop("selected", true);
-		} else {
-			return template.find('option:selected').val();
-		}
-	};
-
 	this.getDataSource = function () {
-		var _this10 = this;
+		var _this11 = this;
 
 		template.empty();
 
@@ -1341,7 +1317,7 @@ function ComboBox(params) {
 
 		switch (settings.dataSource.type) {
 			case 'array':
-				var data = typeof settings.dataSource.data !== "undefined" ? settings.dataSource.data : null;
+				var data = typeof settings.dataSource.data !== 'undefined' ? settings.dataSource.data : null;
 				if (data) {
 					$.each(data, function (index, item) {
 						template.append($('<option/>', {
@@ -1355,35 +1331,39 @@ function ComboBox(params) {
 				this.events.fire("onLoad", [template, data]);
 				break;
 			case 'ajax':
-				$.ajax({
-					url: settings.dataSource.url,
-					type: settings.dataSource.method || "get",
-					data: settings.dataSource.params || {},
-					dataType: 'json',
-					success: function success(res) {
-						if (typeof res.rows !== "undefined" && res.rows.length) {
-							$.each(res.rows, function (index, item) {
-								template.append($('<option/>', {
-									val: item.key,
-									html: item.value,
-									selected: item.key == settings.value,
-									data: item
-								}));
-							});
+				this.dataLoaded = new Promise(function (resolve) {
+					$.ajax({
+						url: settings.dataSource.url,
+						type: settings.dataSource.method || "get",
+						data: settings.dataSource.params || {},
+						dataType: 'json',
+						success: function success(res) {
+							if (typeof res.rows !== "undefined" && res.rows.length) {
+								$.each(res.rows, function (index, item) {
+									template.append($('<option/>', {
+										val: item.key,
+										html: item.value,
+										selected: item.key == settings.value,
+										data: item
+									}));
+								});
+							}
+							resolve(res);
 						}
-						_this10.events.fire("onLoad", [template, res.rows]);
-					}
+					});
+				});
+				this.dataLoaded.then(function (res) {
+					_this11.events.fire("onLoad", [template, res.rows]);
 				});
 				break;
-
 			default:
 				throw "type only available for ajax and array";
-				break;
 		}
 	};
 
-	this.getSettings = function () {
-		return settings;
+	this.setDataSource = function (data) {
+		settings.dataSource = data;
+		this.getDataSource();
 	};
 
 	this.setEnabled = function (enable) {
@@ -1394,9 +1374,12 @@ function ComboBox(params) {
 		template.attr('readonly', readOnly);
 	};
 
-	this.setDataSource = function (data) {
-		settings.dataSource = data;
-		me.getDataSource();
+	this.val = function (v) {
+		if (typeof v !== "undefined") {
+			template.find('option').filter('[value="' + v + '"]').prop("selected", true);
+		} else {
+			return template.find('option:selected').val();
+		}
 	};
 
 	this.renderTo = function (obj) {
@@ -1412,6 +1395,8 @@ function ComboBox(params) {
 		}
 	};
 
+	this.settings = settings;
+
 	if (settings.autoLoad) {
 		this.getDataSource();
 	}
@@ -1420,7 +1405,7 @@ function ComboBox(params) {
 }
 
 function HTML(params) {
-	var _this11 = this;
+	var _this12 = this;
 
 	var settings = $.extend({
 		content: '',
@@ -1448,11 +1433,11 @@ function HTML(params) {
 		$.each(settings.items, function (k, val) {
 			var item = null;
 			if (typeof val.renderTo === 'function') {
-				val.renderTo(_this11.content);
+				val.renderTo(_this12.content);
 			} else if ((typeof val === "undefined" ? "undefined" : _typeof(val)) === 'object') {
 				item = createObject(val);
 				if (item) {
-					item.renderTo(_this11.content);
+					item.renderTo(_this12.content);
 				}
 			}
 		});
@@ -1563,6 +1548,16 @@ function Form(params) {
 	this.setData = function (data) {
 		if (typeof $.fn.autofill !== 'undefined') {
 			content.autofill(data);
+			$.each(data, function (index, item) {
+				var component = items[index];
+				if (typeof component !== 'undefined' && component instanceof ComboBox) {
+					if (component.settings.dataSource.type) {
+						component.dataLoaded.then(function (res) {
+							component.val(item);
+						});
+					}
+				}
+			});
 		} else {
 			console.info('For use, please install https://github.com/creative-area/jQuery-form-autofill.git');
 		}
@@ -1799,7 +1794,7 @@ function Chooser(params) {
 	if (!$.isEmptyObject(this.settings.css)) this.content.css(this.settings.css);
 
 	this.getDataSource = function () {
-		var _this12 = this;
+		var _this13 = this;
 
 		this.content.empty();
 
@@ -1808,7 +1803,7 @@ function Chooser(params) {
 				var data = typeof this.settings.dataSource.data !== "undefined" ? this.settings.dataSource.data : null;
 				if (data) {
 					$.each(data, function (index, item) {
-						_this12.createItem(item);
+						_this13.createItem(item);
 					});
 				}
 				this.events.fire("onLoad", [this.content, data]);
@@ -1830,10 +1825,10 @@ function Chooser(params) {
 						var rows = typeof data.rows !== "undefined" ? data.rows : null;
 						if (rows && rows.length) {
 							$.each(rows, function (index, item) {
-								_this12.createItem(item);
+								_this13.createItem(item);
 							});
 						}
-						_this12.events.fire("onLoad", [_this12.content, rows]);
+						_this13.events.fire("onLoad", [_this13.content, rows]);
 					}
 				});
 				break;
@@ -1880,12 +1875,12 @@ function Chooser(params) {
 	};
 
 	this.renderTo = function (obj) {
-		var _this13 = this;
+		var _this14 = this;
 
 		this.content.appendTo(obj);
 		if (Array.isArray(this.settings.defaultValue) && this.settings.type == "checkbox") {
 			$.each(this.settings.defaultValue, function (index, value) {
-				_this13.content.find("input[value=\"" + value + "\"]").prop('checked', true);
+				_this14.content.find("input[value=\"" + value + "\"]").prop('checked', true);
 			});
 		} else {
 			this.content.find("input[value=\"" + this.settings.defaultValue + "\"]").prop('checked', true);
