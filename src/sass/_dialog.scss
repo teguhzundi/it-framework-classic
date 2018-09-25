@@ -12,12 +12,14 @@
 		flex-direction: column;
 		background: #fff;
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+		position: relative;
 	}
 
 	&-inner {
 		flex: 1;
 		overflow-y: auto;
 		overflow-x: hidden;
+		position: relative;
 	}
 	
 	.it-toolbar {

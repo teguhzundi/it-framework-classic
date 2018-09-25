@@ -1435,10 +1435,14 @@ function HTML(params) {
 
 	let id = !settings.id ? makeid() : settings.id;
 	this.content = $('<div/>', {
-		id: id,
-		css: settings.css,
-		class: settings.class
+		id: id
 	});
+
+	if (!$.isEmptyObject(settings.css))
+		this.content.css(settings.css);
+
+	if (settings.class)
+		this.content.addClass(settings.class);
 
 	if (typeof settings.content === 'string') {
 		this.content.html(settings.content);
