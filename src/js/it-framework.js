@@ -1795,6 +1795,7 @@ function Chooser(params) {
 			type: 'array',
 			url: '',
 			data: [],
+			params: {}
 		},
 		autoLoad: true,
 		block: true,
