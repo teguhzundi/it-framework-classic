@@ -1772,7 +1772,8 @@ function Chooser(params) {
 		dataSource: {
 			type: 'array',
 			url: '',
-			data: []
+			data: [],
+			params: {}
 		},
 		autoLoad: true,
 		block: true,
