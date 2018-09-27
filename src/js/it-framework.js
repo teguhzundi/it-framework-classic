@@ -837,7 +837,7 @@ function ToolBar(params) {
 		if (typeof val === "object") {
 			item = createObject(val);
 			if (item) {
-				items.push(item.getId());
+				items[item.getId()] = item;
 				item.renderTo(li);
 				template.find('.it-toolbar-' + align).append(li);
 			}
