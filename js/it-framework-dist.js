@@ -1331,27 +1331,25 @@ function ComboBox(params) {
 				this.events.fire("onLoad", [template, data]);
 				break;
 			case 'ajax':
-				this.dataLoaded = new Promise(function (resolve) {
-					$.ajax({
-						url: settings.dataSource.url,
-						type: settings.dataSource.method || "get",
-						data: settings.dataSource.params || {},
-						dataType: 'json',
-						success: function success(res) {
-							if (typeof res.rows !== "undefined" && res.rows.length) {
-								$.each(res.rows, function (index, item) {
-									template.append($('<option/>', {
-										val: item.key,
-										html: item.value,
-										selected: item.key == settings.value,
-										data: item
-									}));
-								});
-							}
-							resolve(res);
-						}
-					});
+				this.dataLoaded = $.ajax({
+					url: settings.dataSource.url,
+					type: settings.dataSource.method || "get",
+					data: settings.dataSource.params || {},
+					dataType: 'json'
+				}).then(function (res) {
+					if (typeof res.rows !== "undefined" && res.rows.length) {
+						$.each(res.rows, function (index, item) {
+							template.append($('<option/>', {
+								val: item.key,
+								html: item.value,
+								selected: item.key == settings.value,
+								data: item
+							}));
+						});
+					}
+					return res;
 				});
+
 				this.dataLoaded.then(function (res) {
 					_this11.events.fire("onLoad", [template, res.rows]);
 				});
@@ -1553,7 +1551,7 @@ function Form(params) {
 			$.each(data, function (index, item) {
 				var component = items[index];
 				if (typeof component !== 'undefined' && component instanceof ComboBox) {
-					if (component.settings.dataSource.type) {
+					if (component.settings.dataSource.type !== 'array') {
 						component.dataLoaded.then(function (res) {
 							component.val(item);
 						});

@@ -390,8 +390,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-						src: url + value
-					})
+					src: url + value
+				})
 					.css({
 						height: col.width - 10,
 						display: 'block',
@@ -1351,27 +1351,25 @@ function ComboBox(params) {
 				this.events.fire("onLoad", [template, data]);
 				break;
 			case 'ajax':
-				this.dataLoaded = new Promise((resolve) => {
-					$.ajax({
-						url: settings.dataSource.url,
-						type: settings.dataSource.method || "get",
-						data: settings.dataSource.params || {},
-						dataType: 'json',
-						success: (res) => {
-							if (typeof res.rows !== "undefined" && res.rows.length) {
-								$.each(res.rows, (index, item) => {
-									template.append($('<option/>', {
-										val: item.key,
-										html: item.value,
-										selected: (item.key == settings.value),
-										data: item
-									}));
-								});
-							}
-							resolve(res);
-						}
-					});
+				this.dataLoaded = $.ajax({
+					url: settings.dataSource.url,
+					type: settings.dataSource.method || "get",
+					data: settings.dataSource.params || {},
+					dataType: 'json'
+				}).then(res => {
+					if (typeof res.rows !== "undefined" && res.rows.length) {
+						$.each(res.rows, (index, item) => {
+							template.append($('<option/>', {
+								val: item.key,
+								html: item.value,
+								selected: (item.key == settings.value),
+								data: item
+							}));
+						});
+					}
+					return res;
 				});
+
 				this.dataLoaded.then(res => {
 					this.events.fire("onLoad", [template, res.rows]);
 				});
@@ -1573,8 +1571,8 @@ function Form(params) {
 			$.each(data, (index, item) => {
 				let component = items[index];
 				if (typeof component !== 'undefined' && component instanceof ComboBox) {
-					if (component.settings.dataSource.type) {
-						component.dataLoaded.then((res) => {
+					if (component.settings.dataSource.type !== 'array') {
+						component.dataLoaded.then(res => {
 							component.val(item);
 						});
 					}
