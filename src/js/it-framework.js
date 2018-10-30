@@ -390,8 +390,8 @@ function DataTable(options) {
 			else if (value && typeof col.image !== "undefined" && col.image) {
 				var url = typeof col.url !== "undefined" ? col.url : "";
 				var img = $('<img/>', {
-					src: url + value
-				})
+						src: url + value
+					})
 					.css({
 						height: col.width - 10,
 						display: 'block',
@@ -1650,7 +1650,6 @@ function TextBox(params) {
 		minlength: null,
 		min: 0,
 		max: 100,
-		format: '',
 		disabled: false,
 		readOnly: false,
 		allowBlank: true,
@@ -1745,7 +1744,7 @@ function TextBox(params) {
 	$.extend(this, this.events.set(content));
 
 	this.val = function (v) {
-		if (typeof v == undefined) {
+		if (typeof v === "undefined") {
 			return content.val() || "";
 		} else {
 			content.val(v);
@@ -1855,10 +1854,8 @@ function Chooser(params) {
 					}
 				});
 				break;
-
 			default:
 				throw "type only available for ajax and array";
-				break;
 		}
 	}
 
