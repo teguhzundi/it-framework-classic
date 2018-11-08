@@ -1406,6 +1406,7 @@ function ComboBox(params) {
 				class: 'it-form-control-select',
 				width: settings.width
 			});
+
 			template.appendTo(wrapper);
 			wrapper.appendTo(obj);
 		} else {

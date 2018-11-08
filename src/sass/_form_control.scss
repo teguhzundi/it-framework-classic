@@ -13,7 +13,7 @@ $form-control-height: 32px;
 	box-shadow: inset 0 1px 1px rgba($color: #666, $alpha: .1);
 
 	@at-root textarea {
-		line-height: 20px !important;
+		line-height: 1.8em !important;
 		padding-top: 10px !important;
 		padding-bottom: 10px !important;
 	}
@@ -23,9 +23,13 @@ $form-control-height: 32px;
 	}
 
 	&[readonly] {
+		background: #FFFDC2;
+		border-color: #FFFF8D;
+	}
+
+	&[disabled] {
 		background: #E9ECEF;
 		border-color: #CED4DA;
-		pointer-events: none;
 	}
 
 	&.focus {
